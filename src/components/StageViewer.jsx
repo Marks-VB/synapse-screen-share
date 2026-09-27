@@ -8,7 +8,7 @@ export function StageViewer({
   metrics,
   isDeafened
 }) {
-  const [showScanlines, setShowScanlines] = useState(true);
+  const [showScanlines, setShowScanlines] = useState(false);
   const containerRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -57,18 +57,20 @@ export function StageViewer({
       ref={containerRef}
       className="relative flex-1 w-full rounded-2xl bg-cyber-card border border-cyber-border overflow-hidden flex flex-col justify-between shadow-2xl group"
     >
-      {/* 4 L-Shaped Neon Cyan HUD Brackets */}
-      <div className="hud-corner hud-corner-tl" />
-      <div className="hud-corner hud-corner-tr" />
-      <div className="hud-corner hud-corner-bl" />
-      <div className="hud-corner hud-corner-br" />
+      {/* 4 L-Shaped Neon Cyan HUD Brackets (Only visible when idle) */}
+      {!activeStream && (
+        <>
+          <div className="hud-corner hud-corner-tl" />
+          <div className="hud-corner hud-corner-tr" />
+          <div className="hud-corner hud-corner-bl" />
+          <div className="hud-corner hud-corner-br" />
+        </>
+      )}
 
       {/* Toggleable CRT Scanlines Overlay */}
-      <div
-        className={`crt-scanlines transition-opacity duration-200 ease-out-quick ${
-          showScanlines ? 'opacity-50' : 'opacity-0 pointer-events-none'
-        }`}
-      />
+      {showScanlines && (
+        <div className="crt-scanlines opacity-40 transition-opacity duration-200 ease-out-quick pointer-events-none" />
+      )}
 
       {/* Top Telemetry HUD Overlay */}
       <div className="relative z-30 p-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none select-none">

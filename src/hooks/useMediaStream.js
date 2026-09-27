@@ -41,6 +41,9 @@ export function useMediaStream({ onScreenEnded, onLog }) {
 
       const videoTrack = stream.getVideoTracks()[0];
       if (videoTrack) {
+        if ('contentHint' in videoTrack) {
+          videoTrack.contentHint = 'detail';
+        }
         videoTrack.onended = () => {
           log('Screen capture terminated by OS / user.', 'WARN');
           stopScreenShare();

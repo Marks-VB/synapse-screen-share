@@ -57,7 +57,6 @@ export function Header({
   };
 
   const isConnected = connectionState === 'connected';
-  const isError = connectionState === 'error' || connectionState === 'failed';
   const isReconnecting = connectionState === 'reconnecting' || connectionState === 'connecting';
 
   let statusLabel = 'STANDBY';
@@ -72,10 +71,6 @@ export function Header({
     statusLabel = 'CONNECTING...';
     statusColor = 'text-cyber-cyan';
     dotColor = 'bg-cyber-cyan animate-pulse';
-  } else if (isError) {
-    statusLabel = 'UPLINK_OFFLINE';
-    statusColor = 'text-red-400';
-    dotColor = 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)] animate-pulse';
   }
 
   return (
@@ -99,17 +94,12 @@ export function Header({
         {/* Ticker / Telemetry Bar */}
         <div className="hidden lg:flex items-center text-xs text-slate-400 font-mono pl-4 border-l border-cyber-border">
           <span className="text-slate-600 mr-2">────</span>
-          <button
-            type="button"
-            onClick={isError ? onOpenSettings : undefined}
-            className={`flex items-center gap-1.5 ${isError ? 'cursor-pointer hover:opacity-85' : 'cursor-default'}`}
-            title={isError ? 'Servidor de sinalização inacessível. Clique para abrir configurações.' : undefined}
-          >
+          <div className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full transition-all duration-300 ease-out-quick ${dotColor}`} />
             <span className={`font-bold tracking-wider transition-colors duration-200 ${statusColor}`}>
               {statusLabel}
             </span>
-          </button>
+          </div>
           <span className="text-slate-600 mx-2">────</span>
           <span className="text-slate-400 font-mono">
             [NET: <span className="text-cyber-cyan font-bold">{rttMs !== null ? `${rttMs}ms` : '--'}</span>]

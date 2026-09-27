@@ -408,7 +408,11 @@ export function useWebRTC({
   }, [closeConnection]);
 
   // Consolidated connection status
-  const connectionState = signalingState === 'connected' ? (webrtcState === 'connected' ? 'connected' : 'standby') : signalingState;
+  const connectionState = (signalingState === 'connected' && webrtcState === 'connected')
+    ? 'connected'
+    : (signalingState === 'connecting' || signalingState === 'reconnecting')
+    ? 'connecting'
+    : 'standby';
 
   return {
     pcRef,

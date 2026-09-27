@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-const MAX_RECONNECT_ATTEMPTS = 5;
+const MAX_RECONNECT_ATTEMPTS = 2;
 
 /**
  * Custom hook dedicated strictly to WebSocket signaling transport.
@@ -109,11 +109,11 @@ export function useSignaling({
 
         if (retryCountRef.current < MAX_RECONNECT_ATTEMPTS) {
           retryCountRef.current += 1;
-          const delay = Math.min(1000 * Math.pow(1.8, retryCountRef.current - 1), 10000);
+          const delay = Math.min(1000 * Math.pow(1.8, retryCountRef.current - 1), 6000);
           setConnectionState('reconnecting');
           log(
-            `[SIGNALING] Connection lost. Retrying (${retryCountRef.current}/${MAX_RECONNECT_ATTEMPTS}) in ${(delay / 1000).toFixed(1)}s...`,
-            'WARN'
+            `[SIGNALING] Conectando ao canal (${retryCountRef.current}/${MAX_RECONNECT_ATTEMPTS})...`,
+            'INFO'
           );
 
           if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
@@ -121,20 +121,20 @@ export function useSignaling({
             performConnect(false);
           }, delay);
         } else {
-          setConnectionState('error');
+          setConnectionState('standby');
           log(
-            `[SIGNALING] Max reconnection attempts reached (${MAX_RECONNECT_ATTEMPTS}). Signaling server unreachable at ${signalingUrl}. Verify settings or start local server.`,
-            'ERROR'
+            `[SIGNALING] Canal em modo de espera (STANDBY). Use 'npm run server' ou configure a URL de sinalização em Configurações.`,
+            'INFO'
           );
         }
       };
 
       ws.onerror = () => {
-        log('[SIGNALING] WebSocket communication error (endpoint unreachable or connection rejected).', 'ERROR');
+        // Silently handled in onclose
       };
     } catch (err) {
-      log(`[SIGNALING] Initialization failed: ${err.message}`, 'ERROR');
-      setConnectionState('error');
+      setConnectionState('standby');
+      log(`[SIGNALING] Inicialização em modo de espera: ${err.message}`, 'INFO');
     }
   }, [signalingUrl, roomId, operatorId, send, log]);
 

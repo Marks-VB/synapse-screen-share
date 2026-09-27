@@ -184,24 +184,6 @@ export function App() {
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
 
-      {/* Offline Signaling Warning Banner */}
-      {(connectionState === 'error' || connectionState === 'failed') && (
-        <div className="bg-red-950/80 border-b border-red-500/40 text-red-200 px-4 py-2 flex items-center justify-between text-xs font-mono shrink-0 backdrop-blur-md">
-          <div className="flex items-center gap-2 overflow-hidden text-ellipsis">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-            <span className="truncate">
-              <strong className="text-red-300">UPLINK OFFLINE:</strong> Servidor de sinalização ({signalingUrl}) não alcançado. Inicie o backend localmente (<code className="text-red-100 bg-red-900/60 px-1 py-0.5 rounded">npm run server</code>) ou altere a URL.
-            </span>
-          </div>
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="px-2.5 py-1 rounded bg-red-900/70 hover:bg-red-800 border border-red-500/50 text-red-100 text-[10px] font-bold uppercase transition-colors shrink-0 ml-3"
-          >
-            Configurar URL
-          </button>
-        </div>
-      )}
-
       {/* Main Workspace Body */}
       <div className="flex-1 flex overflow-hidden relative">
         <main className="flex-1 flex flex-col relative p-2.5 sm:p-3.5 min-w-0 bg-cyber-black">

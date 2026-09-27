@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, User, Cookie, Tv, Sparkles, ArrowRight, Check, X, Dices } from 'lucide-react';
-import { generateSecureId, sanitizeIdentifier } from '../App';
+import { generateSecureId, sanitizeIdentifier } from '../utils/security';
 
 export function WelcomeModal({
   isOpen,

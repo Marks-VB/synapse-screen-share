@@ -8,32 +8,8 @@ import { TerminalChat } from './components/TerminalChat';
 import { ModalSettings } from './components/ModalSettings';
 import { Footer } from './components/Footer';
 import { WelcomeModal } from './components/WelcomeModal';
-
-export function sanitizeIdentifier(str, fallback = 'NODE_ALPHA') {
-  if (!str || typeof str !== 'string') return fallback;
-  const sanitized = str.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
-  return sanitized.length >= 3 ? sanitized : fallback;
-}
-
-export function generateSecureId(prefix = 'OPR') {
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-    const array = new Uint8Array(4);
-    window.crypto.getRandomValues(array);
-    const hex = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
-    return `${prefix}_${hex}`;
-  }
-  return `${prefix}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-}
-
-function isValidSignalingUrl(url) {
-  if (!url || typeof url !== 'string') return false;
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'ws:' || parsed.protocol === 'wss:';
-  } catch {
-    return false;
-  }
-}
+import { LoadingScreen } from './components/LoadingScreen';
+import { sanitizeIdentifier, generateSecureId, isValidSignalingUrl } from './utils/security';
 
 function getInitialRoom() {
   const params = new URLSearchParams(window.location.search);
@@ -69,6 +45,7 @@ export function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => !localStorage.getItem('synapse_onboarded'));
+  const [isBooting, setIsBooting] = useState(true);
 
   // Update browser URL query param when room changes
   useEffect(() => {
@@ -266,6 +243,9 @@ export function App() {
           localStorage.setItem('synapse_operator_id', newOp);
         }}
       />
+
+      {/* Cyberpunk Boot Loading Screen */}
+      {isBooting && <LoadingScreen onFinish={() => setIsBooting(false)} />}
     </div>
   );
 }

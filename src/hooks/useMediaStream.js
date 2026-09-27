@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 export function useMediaStream({ onScreenEnded, onLog }) {
   const [screenStream, setScreenStream] = useState(null);

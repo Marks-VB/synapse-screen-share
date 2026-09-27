@@ -134,6 +134,14 @@ export function App() {
     closeConnection();
   };
 
+  // Room Change Action
+  const handleChangeRoom = (newRoom) => {
+    if (newRoom && newRoom !== roomId) {
+      handleTerminate();
+      setRoomId(newRoom);
+    }
+  };
+
   // Settings Save
   const handleSaveSettings = ({ signalingUrl: newUrl, roomId: newRoom, operatorId: newOp }) => {
     setSignalingUrl(newUrl);
@@ -149,6 +157,7 @@ export function App() {
       {/* Top Header & Status Ticker */}
       <Header
         roomId={roomId}
+        onChangeRoom={handleChangeRoom}
         connectionState={connectionState}
         rttMs={metrics.rttMs}
         onOpenSettings={() => setIsSettingsOpen(true)}

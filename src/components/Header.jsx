@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight } from 'lucide-react';
+
+const RANDOM_NAMES = [
+  'CYBER_NODE', 'VALKYRIE_99', 'MATRIX_P2P', 'GHOST_LINK',
+  'NEO_TOKYO', 'SHADOW_RUN', 'SYNAPSE_42', 'DEEP_GRID',
+  'NETRUNNER', 'ZERO_COOL', 'QUANTUM_RAY', 'CHROME_LINK'
+];
 
 export function Header({
   roomId,
+  onChangeRoom,
   connectionState,
   rttMs,
   onOpenSettings,
@@ -10,6 +17,11 @@ export function Header({
   onToggleSidebar
 }) {
   const [copied, setCopied] = useState(false);
+  const [inputRoom, setInputRoom] = useState(roomId);
+
+  useEffect(() => {
+    setInputRoom(roomId);
+  }, [roomId]);
 
   const handleCopyLink = () => {
     const currentUrl = window.location.href;
@@ -17,6 +29,22 @@ export function Header({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleApplyRoom = (e) => {
+    e?.preventDefault();
+    const cleanRoom = inputRoom.trim().toUpperCase();
+    if (cleanRoom && cleanRoom !== roomId) {
+      onChangeRoom(cleanRoom);
+    }
+  };
+
+  const handleRandomRoom = () => {
+    const randomPrefix = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
+    const randomSuffix = Math.floor(10 + Math.random() * 90);
+    const newRoom = `${randomPrefix}_${randomSuffix}`;
+    setInputRoom(newRoom);
+    onChangeRoom(newRoom);
   };
 
   const isConnected = connectionState === 'connected';
@@ -40,7 +68,7 @@ export function Header({
         </div>
 
         {/* Ticker / Telemetry Bar */}
-        <div className="hidden md:flex items-center text-xs text-slate-400 font-mono pl-4 border-l border-cyber-border">
+        <div className="hidden lg:flex items-center text-xs text-slate-400 font-mono pl-4 border-l border-cyber-border">
           <span className="text-slate-600 mr-2">────</span>
           <span className="flex items-center gap-1.5">
             <span
@@ -50,7 +78,11 @@ export function Header({
                   : 'bg-cyber-amber shadow-glow-amber'
               }`}
             />
-            <span className={`font-bold tracking-wider transition-colors duration-200 ${isConnected ? 'text-cyber-green' : 'text-cyber-amber'}`}>
+            <span
+              className={`font-bold tracking-wider transition-colors duration-200 ${
+                isConnected ? 'text-cyber-green' : 'text-cyber-amber'
+              }`}
+            >
               {isConnected ? 'LINK_ACTIVE' : 'STANDBY'}
             </span>
           </span>
@@ -65,35 +97,59 @@ export function Header({
         </div>
       </div>
 
-      {/* Action Controls */}
-      <div className="flex items-center gap-2.5">
-        {/* Node Badge */}
-        <div className="flex items-center bg-cyber-card border border-cyber-border rounded px-2.5 py-1 text-xs">
-          <span className="text-slate-400 mr-1.5 uppercase text-[10px] tracking-wider">NODE:</span>
-          <span className="text-cyber-cyan font-bold font-mono text-xs uppercase tracking-wider">
-            {roomId}
+      {/* Action Controls & Room Switcher */}
+      <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Interactive Room Selector Form */}
+        <form onSubmit={handleApplyRoom} className="flex items-center bg-cyber-card border border-cyber-border focus-within:border-cyber-cyan/60 rounded px-2 py-1 text-xs transition-colors">
+          <span className="text-slate-400 mr-1.5 uppercase text-[10px] tracking-wider font-semibold">
+            NODE:
           </span>
-        </div>
+          <input
+            type="text"
+            value={inputRoom}
+            onChange={(e) => setInputRoom(e.target.value.toUpperCase())}
+            placeholder="NOME_DA_SALA"
+            className="bg-transparent text-cyber-cyan font-bold font-mono text-xs uppercase tracking-wider outline-none w-24 sm:w-28 placeholder:text-slate-600"
+            title="Digite o nome da sala e pressione Enter ou clique na seta"
+          />
+          {inputRoom !== roomId && (
+            <button
+              type="submit"
+              className="p-1 rounded bg-cyber-cyan/20 hover:bg-cyber-cyan/30 text-cyber-cyan transition-colors ml-1"
+              title="Entrar nesta sala"
+            >
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleRandomRoom}
+            className="p-1 rounded text-slate-400 hover:text-cyber-cyan hover:bg-slate-800 transition-colors ml-1"
+            title="Gerar nome de sala aleatório"
+          >
+            <Dices className="w-3.5 h-3.5" />
+          </button>
+        </form>
 
         {/* Copy Shareable Link */}
         <button
           onClick={handleCopyLink}
-          aria-label={copied ? 'Link de compartilhamento copiado para a área de transferência' : 'Copiar link de compartilhamento da sala'}
-          className="flex items-center gap-1.5 bg-cyber-cyan/10 hover:bg-cyber-cyan/20 active:scale-[0.97] border border-cyber-cyan/40 text-cyber-cyan-bright px-3 py-1.5 rounded text-xs transition-transform transition-colors duration-150 ease-out-quick shadow-glow-cyan-sm"
-          title="Copy Synapse Share Link"
+          aria-label={copied ? 'Link de compartilhamento copiado' : 'Copiar link de compartilhamento da sala'}
+          className="flex items-center gap-1.5 bg-cyber-cyan/10 hover:bg-cyber-cyan/20 active:scale-[0.97] border border-cyber-cyan/40 text-cyber-cyan-bright px-2.5 sm:px-3 py-1.5 rounded text-xs transition-transform transition-colors duration-150 ease-out-quick shadow-glow-cyan-sm"
+          title="Copiar link direto para esta sala"
         >
           {copied ? (
             <>
               <Check className="w-3.5 h-3.5 text-cyber-green" aria-hidden="true" />
-              <span className="font-semibold uppercase tracking-wider text-[11px] text-cyber-green">
-                LINK COPIED!
+              <span className="font-semibold uppercase tracking-wider text-[11px] text-cyber-green hidden sm:inline">
+                LINK COPIADO!
               </span>
             </>
           ) : (
             <>
               <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
-              <span className="font-semibold uppercase tracking-wider text-[11px]">
-                COPY SYNAPSE LINK
+              <span className="font-semibold uppercase tracking-wider text-[11px] hidden sm:inline">
+                COMPARTILHAR LINK
               </span>
             </>
           )}
@@ -104,7 +160,7 @@ export function Header({
           onClick={onOpenSettings}
           aria-label="Abrir configurações de nó e rede"
           className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
-          title="Network & Node Configuration"
+          title="Configurações (Servidor, Sala, Usuário)"
         >
           <Settings className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -115,7 +171,7 @@ export function Header({
           aria-label={isSidebarOpen ? 'Fechar barra lateral de mensagens e diagnóstico' : 'Abrir barra lateral de mensagens e diagnóstico'}
           aria-expanded={isSidebarOpen}
           className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
-          title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}
+          title={isSidebarOpen ? 'Fechar Sidebar' : 'Abrir Sidebar'}
         >
           {isSidebarOpen ? (
             <PanelRightClose className="w-4 h-4" aria-hidden="true" />

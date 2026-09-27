@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight } from 'lucide-react';
+import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight, HelpCircle } from 'lucide-react';
 
 const RANDOM_NAMES = [
   'CYBER_NODE', 'VALKYRIE_99', 'MATRIX_P2P', 'GHOST_LINK',
@@ -13,6 +13,7 @@ export function Header({
   connectionState,
   rttMs,
   onOpenSettings,
+  onOpenHelp,
   isSidebarOpen,
   onToggleSidebar
 }) {
@@ -161,6 +162,16 @@ export function Header({
               </span>
             </>
           )}
+        </button>
+
+        {/* Help & Privacy Modal Button */}
+        <button
+          onClick={onOpenHelp}
+          aria-label="Abrir guia de introdução, protocolo e privacidade"
+          className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
+          title="Guia do Operador & Privacidade (Cookies/Local)"
+        >
+          <HelpCircle className="w-4 h-4" aria-hidden="true" />
         </button>
 
         {/* Settings Button */}

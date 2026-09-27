@@ -7,6 +7,7 @@ import { QuantumDock } from './components/QuantumDock';
 import { TerminalChat } from './components/TerminalChat';
 import { ModalSettings } from './components/ModalSettings';
 import { Footer } from './components/Footer';
+import { WelcomeModal } from './components/WelcomeModal';
 
 export function sanitizeIdentifier(str, fallback = 'NODE_ALPHA') {
   if (!str || typeof str !== 'string') return fallback;
@@ -67,6 +68,7 @@ export function App() {
   const [operatorId, setOperatorId] = useState(getInitialOperator);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => !localStorage.getItem('synapse_onboarded'));
 
   // Update browser URL query param when room changes
   useEffect(() => {
@@ -196,6 +198,7 @@ export function App() {
         connectionState={connectionState}
         rttMs={metrics.rttMs}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenHelp={() => setIsWelcomeOpen(true)}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
@@ -249,6 +252,19 @@ export function App() {
         roomId={roomId}
         operatorId={operatorId}
         onSave={handleSaveSettings}
+      />
+
+      {/* Welcome & Localhost Onboarding Modal */}
+      <WelcomeModal
+        isOpen={isWelcomeOpen}
+        onClose={() => setIsWelcomeOpen(false)}
+        currentOperator={operatorId}
+        currentRoom={roomId}
+        onSaveProfile={({ operatorId: newOp, roomId: newRoom }) => {
+          setOperatorId(newOp);
+          setRoomId(newRoom);
+          localStorage.setItem('synapse_operator_id', newOp);
+        }}
       />
     </div>
   );

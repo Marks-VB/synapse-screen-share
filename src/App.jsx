@@ -6,6 +6,7 @@ import { StageViewer } from './components/StageViewer';
 import { QuantumDock } from './components/QuantumDock';
 import { TerminalChat } from './components/TerminalChat';
 import { ModalSettings } from './components/ModalSettings';
+import { Footer } from './components/Footer';
 
 export function sanitizeIdentifier(str, fallback = 'NODE_ALPHA') {
   if (!str || typeof str !== 'string') return fallback;
@@ -236,6 +237,9 @@ export function App() {
           operatorId={operatorId}
         />
       </div>
+
+      {/* Cyberpunk Status Footer */}
+      <Footer />
 
       {/* Settings Modal */}
       <ModalSettings

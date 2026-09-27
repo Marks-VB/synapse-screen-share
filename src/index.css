@@ -206,6 +206,20 @@ video {
   animation: pulseGlow 2.5s infinite var(--ease-in-out-smooth);
 }
 
+/* Terminal Cursor Blink */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
 /* Reduced Motion Compliance */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
@@ -218,7 +232,8 @@ video {
 
   .animate-stream-arrival,
   .animate-modal-enter,
-  .animate-glow-pulse-green {
+  .animate-glow-pulse-green,
+  .cursor-blink {
     animation: none !important;
     transform: none !important;
     filter: none !important;

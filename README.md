@@ -19,7 +19,7 @@
 [![PWA Ready](https://img.shields.io/badge/PWA-Installable-ff007f.svg?style=flat-square)](https://web.dev/progressive-web-apps/)
 [![Accessibility](https://img.shields.io/badge/WCAG-2.2%20Compliant-39ff14.svg?style=flat-square)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 
-[Live Demo](https://synapse.pages.dev) • [Features](#-key-features) • [Architecture](#-architecture--c4-model) • [Quick Start](#-quick-start) • [Contributing](CONTRIBUTING.md)
+[Live Demo](https://synapse.marksvb.dev) • [Features](#-key-features) • [Architecture](#-architecture--c4-model) • [Quick Start](#-quick-start) • [Contributing](CONTRIBUTING.md)
 
 </div>
 

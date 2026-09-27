@@ -2,6 +2,7 @@
   "name": "synapse-screen-share",
   "version": "1.1.0",
   "description": "Ultra-responsive Cyberpunk WebRTC screen-sharing client built with React, Vite, and Tailwind CSS for Cloudflare Pages",
+  "homepage": "https://synapse.marksvb.dev",
   "license": "MIT",
   "keywords": [
     "webrtc",

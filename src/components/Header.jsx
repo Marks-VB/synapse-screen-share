@@ -33,16 +33,24 @@ export function Header({
 
   const handleApplyRoom = (e) => {
     e?.preventDefault();
-    const cleanRoom = inputRoom.trim().toUpperCase();
+    const cleanRoom = inputRoom.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
     if (cleanRoom && cleanRoom !== roomId) {
+      setInputRoom(cleanRoom);
       onChangeRoom(cleanRoom);
     }
   };
 
   const handleRandomRoom = () => {
     const randomPrefix = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
-    const randomSuffix = Math.floor(10 + Math.random() * 90);
-    const newRoom = `${randomPrefix}_${randomSuffix}`;
+    let suffix = '00';
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const array = new Uint8Array(2);
+      window.crypto.getRandomValues(array);
+      suffix = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    } else {
+      suffix = Math.floor(10 + Math.random() * 90).toString();
+    }
+    const newRoom = `${randomPrefix}_${suffix}`;
     setInputRoom(newRoom);
     onChangeRoom(newRoom);
   };

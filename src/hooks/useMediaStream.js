@@ -27,7 +27,11 @@ export function useMediaStream({ onScreenEnded, onLog }) {
           frameRate: { ideal: 60, max: 60 },
           cursor: 'always'
         },
-        audio: true
+        audio: true,
+        // Privacy & Security protections: prevent accidental recursive tab capture
+        selfBrowserSurface: 'exclude',
+        surfaceSwitching: 'include',
+        systemAudio: 'include'
       };
 
       const stream = await navigator.mediaDevices.getDisplayMedia(constraints);
@@ -167,6 +171,20 @@ export function useMediaStream({ onScreenEnded, onLog }) {
     setMicStream(null);
     setIsMicMuted(true);
   }, [stopScreenShare]);
+
+  // Ensure all active tracks are stopped when hook unmounts
+  useEffect(() => {
+    return () => {
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach((track) => track.stop());
+        screenStreamRef.current = null;
+      }
+      if (micStreamRef.current) {
+        micStreamRef.current.getTracks().forEach((track) => track.stop());
+        micStreamRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     screenStream,

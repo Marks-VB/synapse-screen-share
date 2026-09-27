@@ -6,3 +6,5 @@ dist-ssr
 .env
 .env.*
 .wrangler
+.agents/
+skills-lock.json

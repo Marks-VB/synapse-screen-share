@@ -7,15 +7,41 @@ import { QuantumDock } from './components/QuantumDock';
 import { TerminalChat } from './components/TerminalChat';
 import { ModalSettings } from './components/ModalSettings';
 
+export function sanitizeIdentifier(str, fallback = 'NODE_ALPHA') {
+  if (!str || typeof str !== 'string') return fallback;
+  const sanitized = str.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
+  return sanitized.length >= 3 ? sanitized : fallback;
+}
+
+export function generateSecureId(prefix = 'OPR') {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const array = new Uint8Array(4);
+    window.crypto.getRandomValues(array);
+    const hex = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+    return `${prefix}_${hex}`;
+  }
+  return `${prefix}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+}
+
+function isValidSignalingUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'ws:' || parsed.protocol === 'wss:';
+  } catch {
+    return false;
+  }
+}
+
 function getInitialRoom() {
   const params = new URLSearchParams(window.location.search);
   const r = params.get('room');
-  return r ? r.toUpperCase().trim() : 'NODE_ALPHA';
+  return sanitizeIdentifier(r, 'NODE_ALPHA');
 }
 
 function getInitialSignalingUrl() {
   const saved = localStorage.getItem('synapse_signaling_url');
-  if (saved) return saved;
+  if (saved && isValidSignalingUrl(saved)) return saved;
 
   const isHttps = window.location.protocol === 'https:';
   const port = window.location.port === '5173' ? '3000' : window.location.port;
@@ -25,8 +51,11 @@ function getInitialSignalingUrl() {
 
 function getInitialOperator() {
   const saved = localStorage.getItem('synapse_operator_id');
-  if (saved) return saved;
-  const generated = 'OPR_' + Math.random().toString(36).substring(2, 6).toUpperCase();
+  if (saved) {
+    const sanitized = sanitizeIdentifier(saved, '');
+    if (sanitized) return sanitized;
+  }
+  const generated = generateSecureId('OPR');
   localStorage.setItem('synapse_operator_id', generated);
   return generated;
 }
@@ -136,19 +165,24 @@ export function App() {
 
   // Room Change Action
   const handleChangeRoom = (newRoom) => {
-    if (newRoom && newRoom !== roomId) {
+    const cleanRoom = sanitizeIdentifier(newRoom, roomId);
+    if (cleanRoom && cleanRoom !== roomId) {
       handleTerminate();
-      setRoomId(newRoom);
+      setRoomId(cleanRoom);
     }
   };
 
   // Settings Save
   const handleSaveSettings = ({ signalingUrl: newUrl, roomId: newRoom, operatorId: newOp }) => {
-    setSignalingUrl(newUrl);
-    setRoomId(newRoom);
-    setOperatorId(newOp);
-    localStorage.setItem('synapse_signaling_url', newUrl);
-    localStorage.setItem('synapse_operator_id', newOp);
+    const cleanUrl = isValidSignalingUrl(newUrl) ? newUrl.trim() : signalingUrl;
+    const cleanRoom = sanitizeIdentifier(newRoom, roomId);
+    const cleanOp = sanitizeIdentifier(newOp, operatorId);
+
+    setSignalingUrl(cleanUrl);
+    setRoomId(cleanRoom);
+    setOperatorId(cleanOp);
+    localStorage.setItem('synapse_signaling_url', cleanUrl);
+    localStorage.setItem('synapse_operator_id', cleanOp);
     handleTerminate();
   };
 

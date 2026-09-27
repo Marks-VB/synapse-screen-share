@@ -17,10 +17,14 @@ export function ModalSettings({
 
   const handleSave = (e) => {
     e.preventDefault();
+    const cleanRoom = formRoomId.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
+    const cleanOperator = formOperatorId.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
+    const cleanUrl = formSignalingUrl.trim();
+
     onSave({
-      signalingUrl: formSignalingUrl.trim(),
-      roomId: formRoomId.trim().toUpperCase(),
-      operatorId: formOperatorId.trim().toUpperCase()
+      signalingUrl: cleanUrl,
+      roomId: cleanRoom || roomId,
+      operatorId: cleanOperator || operatorId
     });
     onClose();
   };

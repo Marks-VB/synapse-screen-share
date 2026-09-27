@@ -2,6 +2,19 @@
   "name": "synapse-screen-share",
   "version": "1.1.0",
   "description": "Ultra-responsive Cyberpunk WebRTC screen-sharing client built with React, Vite, and Tailwind CSS for Cloudflare Pages",
+  "license": "MIT",
+  "keywords": [
+    "webrtc",
+    "screen-sharing",
+    "cyberpunk",
+    "p2p",
+    "pwa",
+    "react",
+    "vite",
+    "tailwind",
+    "datachannel",
+    "low-latency"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +34,7 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background-color:#10131a;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.scanline-grid{background-image:linear-gradient(rgba(18,21,28,0) 50%,rgba(6,182,212,0.03) 50%),linear-gradient(90deg,rgba(76,215,246,0.02),rgba(0,0,0,0) 100%);background-size:100% 4px,6px 100%;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed-dim":"#4cd7f6","secondary-container":"#6f00be","on-surface":"#e0e2ec","primary":"#4cd7f6","surface-container-lowest":"#0b0e15","error":"#ffb4ab","surface-dim":"#10131a","inverse-on-surface":"#2d3038","surface-tint":"#4cd7f6","on-primary":"#003640","error-container":"#93000a","inverse-primary":"#00687a","tertiary":"#4edea3","on-secondary-container":"#d6a9ff","on-primary-fixed-variant":"#004e5c","outline":"#869397","surface-variant":"#32353c","on-secondary-fixed-variant":"#6900b3","tertiary-fixed":"#6ffbbe","on-primary-fixed":"#001f26","secondary-fixed-dim":"#ddb7ff","surface":"#10131a","on-secondary-fixed":"#2c0051","surface-container-high":"#272a31","background":"#10131a","on-tertiary-fixed-variant":"#005236","on-error-container":"#ffdad6","on-background":"#e0e2ec","on-error":"#690005","on-surface-variant":"#bcc9cd","surface-container-highest":"#32353c","on-tertiary-container":"#00452e","secondary":"#ddb7ff","surface-bright":"#363941","on-tertiary":"#003824","inverse-surface":"#e0e2ec","tertiary-container":"#1bbd85","primary-fixed":"#acedff","tertiary-fixed-dim":"#4edea3","secondary-fixed":"#f0dbff","on-secondary":"#490080","primary-container":"#06b6d4","surface-container":"#1d2027","outline-variant":"#3d494c","on-tertiary-fixed":"#002113","surface-container-low":"#191c23","on-primary-container":"#00424f"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin-desktop":"2.5rem","space-lg":"1.25rem","margin":"1rem","space-xl":"2rem","space-sm":"0.5rem","gutter":"1rem","space-md":"0.75rem","space-xs":"0.25rem","gutter-desktop":"1.5rem"},"fontFamily":{"headline-xl":["Space Grotesk"],"headline-lg-mobile":["Space Grotesk"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"body-lg":["JetBrains Mono"],"body-sm":["JetBrains Mono"],"headline-xl-mobile":["Space Grotesk"],"headline-md":["Space Grotesk"],"body-md":["JetBrains Mono"],"label-sm":["JetBrains Mono"],"label-lg":["JetBrains Mono"]},"fontSize":{"headline-xl":["48px",{"lineHeight":"52px","letterSpacing":"-0.04em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"28px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["11px",{"lineHeight":"14px","letterSpacing":"0.1em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"38px","letterSpacing":"-0.03em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"400"}],"headline-xl-mobile":["32px",{"lineHeight":"36px","letterSpacing":"-0.03em","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"26px","letterSpacing":"-0.02em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"400"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.12em","fontWeight":"500"}],"label-lg":["12px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface-container-lowest text-on-surface font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen scanline-grid"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-dim z-50 flex flex-col border-r border-outline-variant/30 backdrop-blur-xl"><div class="h-16 px-space-md flex items-center gap-space-sm border-b border-outline-variant/30 bg-surface-container-lowest/80"><span class="w-2 h-2 bg-primary rounded-full animate-ping"></span><span class="font-label-lg text-label-lg tracking-widest text-primary uppercase">NODE::MATRIX</span><span class="ml-auto font-label-sm text-label-sm text-outline border border-outline-variant/40 px-1 py-0.5 rounded">v4.09</span></div><div class="px-space-md py-space-sm border-b border-outline-variant/20 bg-surface-container-low/40"><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-tertiary rounded-full"></span>RELAY</span><span class="text-primary font-label-sm text-label-sm">ONLINE</span></div><div class="font-label-sm text-label-sm text-outline truncate mt-0.5">CH_KEY: 0x9F4A..88E</div></div><nav class="flex-1 px-space-xs py-space-md space-y-1 overflow-y-auto" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary font-bold"><div class="px-space-sm pb-1 font-label-sm text-label-sm text-outline uppercase tracking-wider">Operational Units</div><a aria-current="page" class="flex items-center gap-space-sm px-space-sm py-space-sm transition-colors tracking-wider uppercase bg-surface-container-high text-primary border-l-2 border-primary font-bold" data-path="tactical-hud" href="#"><span class="material-symbols-outlined text-[18px]">grid_view</span>Tactical HUD</a><a class="flex items-center gap-space-sm px-space-sm py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md tracking-wider uppercase" data-path="stream-matrix" href="#"><span class="material-symbols-outlined text-[18px]">screen_share</span>Stream Matrix</a><a class="flex items-center gap-space-sm px-space-sm py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md tracking-wider uppercase" data-path="comms-array" href="#"><span class="material-symbols-outlined text-[18px]">graphic_eq</span>Comms Array</a><a class="flex items-center gap-space-sm px-space-sm py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md tracking-wider uppercase" data-path="peer-routing" href="#"><span class="material-symbols-outlined text-[18px]">hub</span>Peer Routing</a><a class="flex items-center gap-space-sm px-space-sm py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md tracking-wider uppercase" data-path="telemetry-logs" href="#"><span class="material-symbols-outlined text-[18px]">terminal</span>Telemetry Logs</a><div class="pt-space-md px-space-sm pb-1 font-label-sm text-label-sm text-outline uppercase tracking-wider">Security Core</div><a class="flex items-center gap-space-sm px-space-sm py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md tracking-wider uppercase" data-path="cipher-keys" href="#"><span class="material-symbols-outlined text-[18px]">key</span>Cipher Keys</a><a class="flex items-center gap-space-sm px-space-sm py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md tracking-wider uppercase" data-path="system-diagnostics" href="#"><span class="material-symbols-outlined text-[18px]">memory</span>Diagnostics</a></nav><div class="p-space-sm border-t border-outline-variant/30 bg-surface-container-lowest"><div class="bg-surface-container-low p-space-xs rounded border border-outline-variant/40"><div class="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant"><span>WEBRTC STACK</span><span class="text-tertiary">v2.4</span></div><div class="w-full bg-surface-container-highest h-1 mt-1 rounded overflow-hidden"><div class="bg-primary h-full w-[84%]"></div></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-dim/90 backdrop-blur-md border-b border-outline-variant/30 z-40 px-space-md"><div class="h-16 flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><img alt="CYBER_LINK Kernel Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XV3TL-J1ktXIW_SgzratZq5tm5rCEX7SNh-xviYbxA0atpdYDXuLCLVjEGStbpHgIVULO7bubLNwAquvjCZ-OIDcQTgE3FlT8K7pvFYc3rwCwHF6JIfE4kIMYOiucWmKL_5cHiA4IwBuisNf-cDDh-n0H65_pg7BytjrA-NV8eVfITzhWPVr8fkpGyZvTnNfSMFK2z0d613SCpiMRDrB1jygA2nNVFywLcaRj07xfxn7lkF5qgau7-ST6Y"/><div class="flex flex-col"><span class="font-headline-md text-headline-md tracking-tight uppercase text-primary leading-none">CYBER_LINK</span><span class="font-label-sm text-label-sm tracking-widest text-outline">PROTOCOL // v4.09</span></div></div><div class="hidden xl:flex items-center gap-space-md px-space-md py-1 rounded bg-surface-container-lowest/90 border border-outline-variant/40"><div class="flex items-center gap-1 font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span><span class="text-tertiary font-bold">SYS_STATUS::OPTIMAL</span></div><span class="text-outline-variant">|</span><span class="font-label-sm text-label-sm text-on-surface-variant">ENCRYPT: <span class="text-secondary font-bold">AES-GCM-256</span></span><span class="text-outline-variant">|</span><span class="font-label-sm text-label-sm text-primary">PEER_LINK::ESTABLISHED [3 PEERS ACTIVE]</span><span class="text-outline-variant">|</span><span class="font-label-sm text-label-sm text-on-surface-variant">ICE_CANDIDATE::<span class="text-primary-fixed-dim">HOST_RELAY</span></span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-low rounded border border-outline-variant/40"><span class="material-symbols-outlined text-[16px] text-tertiary">wifi_tethering</span><span class="font-label-sm text-label-sm text-on-surface">14ms</span></div><div class="flex items-center gap-space-sm"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover border border-primary/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTP-KV47MXsQAQFNq6psaQRzIr4dwD4poAM9LY5I-wqJkxSV99Yg-WJLu5MwqvQXFPz0asgLtE1p-yu--YL27DS4O5W3Cz8i7XEN8DQP29yBxQYxU0VVDX9dtaDjPO6bAVFLBrHX8tKKxk1zb9roeXgmatCI2ly3f_poIbJr5aDe-3agXlYthI2iZZC9NgLcW9rH-FoAbCKsDf8Ygo2mIxxVzR6aLTHxq4CdgGtKuE3UOKQXTxWwsYCg"/><span class="absolute bottom-0 right-0 w-2 h-2 bg-tertiary rounded-full ring-2 ring-surface-dim"></span></div><div class="hidden sm:flex flex-col text-left"><span class="font-label-sm text-label-sm text-on-surface leading-tight uppercase font-bold">OPR_094</span><span class="font-label-sm text-label-sm text-outline leading-none">LEVEL_5</span></div></div></div></div></header><main class="relative pt-16 w-full min-h-screen bg-surface-container-lowest"><div class="flex flex-col w-full h-[calc(100vh-4rem)] overflow-hidden bg-surface-container-lowest text-on-surface font-body-md select-none">
+<!-- TOP WORKSPACE SUB-BAR: TACTICAL TELEMETRY & SYSTEM NODES -->
+<div class="h-10 px-space-md bg-surface-dim/95 flex items-center justify-between shrink-0 shadow-sm border-b border-outline-variant/30">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">WEBRTC_CORE::MESH_LINK</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline hidden md:inline">NODE_ID: <span class="text-on-surface font-mono">0x7F4B::VALKYRIE</span></span>
+<span class="font-label-sm text-label-sm text-outline hidden lg:inline">ICE_TRANSPORT: <span class="text-tertiary font-mono">TURN_P2P_DIRECT</span></span>
+</div>
+<div class="flex items-center gap-space-lg font-label-sm text-label-sm">
+<div class="hidden sm:flex items-center gap-2 text-on-surface-variant">
+<span>ENC:</span>
+<span class="px-1.5 py-0.5 rounded bg-secondary-container/40 text-secondary font-bold">DTLS-SRTP 256</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">PACKET_BITRATE:</span>
+<span class="text-primary font-bold font-mono" id="live-bitrate">4,812 kbps</span>
+</div>
+<div class="flex items-center gap-1.5 text-tertiary">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-bold">RTT: 18ms</span>
+</div>
+</div>
+</div>
+<!-- MAIN THREE-COLUMN CYBERNETIC WORKSPACE -->
+<div class="flex-1 flex overflow-hidden relative">
+<!-- ============================================================ -->
+<!-- LEFT PANEL: VOICE & ROOM SIDEBAR (CELLS & OPERATIVES)       -->
+<!-- ============================================================ -->
+<aside class="w-72 bg-surface-dim/80 flex flex-col shrink-0 transition-all duration-300 relative border-r border-outline-variant/20" id="sidebar-left">
+<!-- Section Header -->
+<div class="p-space-md flex items-center justify-between bg-surface-container-lowest/60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">view_in_ar</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold tracking-widest uppercase">// ACTIVE CELLS [THREAD]</span>
+</div>
+<button class="text-outline hover:text-primary transition-colors p-1" id="toggle-rooms-btn" title="Collapse Cell Stack">
+<span class="material-symbols-outlined text-[18px]">keyboard_double_arrow_left</span>
+</button>
+</div>
+<!-- Process List of Rooms -->
+<div class="flex-1 overflow-y-auto px-space-xs py-space-sm space-y-space-xs">
+<!-- ROOM 01 (ACTIVE & EXPANDED) -->
+<div class="p-2 rounded bg-surface-container-low shadow-sm">
+<div class="flex items-center justify-between pb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-sm bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-primary font-bold tracking-wider">CELL_01A::CYBER_SPACE</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline px-1 py-0.2 bg-surface-dim rounded">4/8</span>
+</div>
+<!-- Operatives inside Cell 01 -->
+<div class="mt-1 space-y-1">
+<!-- Operative 1: K3RN3L_PHANTOM (Host & Speaking) -->
+<div class="flex items-center justify-between p-1.5 rounded bg-surface-container/70 shadow-sm relative group">
+<div class="flex items-center gap-2">
+<div class="relative flex items-center justify-center">
+<!-- Hexagonal pulse simulation -->
+<div class="w-7 h-7 rounded bg-secondary-container/40 flex items-center justify-center shadow-md animate-pulse">
+<span class="material-symbols-outlined text-[15px] text-secondary">mic</span>
+</div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface font-bold tracking-tight">K3RN3L_PHANTOM</span>
+<span class="px-1 py-0.2 bg-secondary/20 text-secondary text-[8px] rounded uppercase font-bold">HOST</span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary">STREAMING [AV1]</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="flex h-1.5 w-1.5 rounded-full bg-tertiary animate-ping"></span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">graphic_eq</span>
+</div>
+</div>
+<!-- Operative 2: VEX_NULL -->
+<div class="flex items-center justify-between p-1.5 rounded hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-[15px] text-on-surface-variant">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">VEX_NULL</span>
+<span class="font-label-sm text-label-sm text-outline">LISTENING</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline">mic_off</span>
+</div>
+<!-- Operative 3: NYX_ZERO -->
+<div class="flex items-center justify-between p-1.5 rounded hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-[15px] text-on-surface-variant">terminal</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">NYX_ZERO</span>
+<span class="font-label-sm text-label-sm text-outline">LISTENING</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline">mic_off</span>
+</div>
+<!-- Operative 4: CY_GHOST -->
+<div class="flex items-center justify-between p-1.5 rounded hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-[15px] text-on-surface-variant">fingerprint</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">CY_GHOST</span>
+<span class="font-label-sm text-label-sm text-outline">MUTED</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-error">headset_off</span>
+</div>
+</div>
+</div>
+<!-- ROOM 02 -->
+<div class="p-2 rounded bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant group-hover:text-primary font-bold tracking-wider">CELL_02B::MATRIX_RELAY</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">2/4</span>
+</div>
+</div>
+<!-- ROOM 03 (LOCKED) -->
+<div class="p-2 rounded bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer group opacity-75">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-outline">lock</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant group-hover:text-secondary font-bold tracking-wider">CELL_03C::DEEP_CIPHER</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">RESTRICTED</span>
+</div>
+</div>
+<!-- ROOM 04 (IDLE) -->
+<div class="p-2 rounded bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer group opacity-60">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-outline/40"></span>
+<span class="font-label-sm text-label-sm text-outline group-hover:text-on-surface font-bold tracking-wider">CELL_04X::GHOST_LINK</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">IDLE</span>
+</div>
+</div>
+</div>
+<!-- Operative Profile Stack (Bottom of Sidebar) -->
+<div class="p-space-sm bg-surface-container-low shadow-md">
+<div class="flex items-center gap-space-sm p-1.5 rounded bg-surface-dim">
+<div class="relative shrink-0">
+<img alt="Operative Valkyrie" class="w-10 h-10 rounded object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTP-KV47MXsQAQFNq6psaQRzIr4dwD4poAM9LY5I-wqJkxSV99Yg-WJLu5MwqvQXFPz0asgLtE1p-yu--YL27DS4O5W3Cz8i7XEN8DQP29yBxQYxU0VVDX9dtaDjPO6bAVFLBrHX8tKKxk1zb9roeXgmatCI2ly3f_poIbJr5aDe-3agXlYthI2iZZC9NgLcW9rH-FoAbCKsDf8Ygo2mIxxVzR6aLTHxq4CdgGtKuE3UOKQXTxWwsYCg"/>
+<span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold truncate">OP_VALKYRIE</span>
+<span class="font-label-sm text-label-sm text-tertiary font-bold font-mono">15ms</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider block truncate">RANK::NETRUNNER_L3</span>
+</div>
+</div>
+<!-- Micro Quick Actions Bar -->
+<div class="flex items-center justify-between gap-1 mt-2">
+<button class="flex-1 py-1.5 rounded bg-surface-container flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-colors" id="mic-toggle-btn" title="Toggle Microphone">
+<span class="material-symbols-outlined text-[16px]">mic</span>
+</button>
+<button class="flex-1 py-1.5 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-bright transition-colors" id="deafen-toggle-btn" title="Deafen Audio">
+<span class="material-symbols-outlined text-[16px]">headphones</span>
+</button>
+<button class="flex-1 py-1.5 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-bright transition-colors" id="settings-open-btn" title="Engine Config">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+</button>
+<button class="flex-1 py-1.5 rounded bg-error-container/30 flex items-center justify-center text-error hover:bg-error hover:text-on-error transition-colors" title="Terminate Link">
+<span class="material-symbols-outlined text-[16px]">power_settings_new</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- ============================================================ -->
+<!-- CENTER CANVAS: MAIN STAGE (STREAM VIEWPORT & CONTROLS)      -->
+<!-- ============================================================ -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface-container-lowest relative p-space-sm sm:p-space-md">
+<!-- SCREEN STREAM CONTAINER -->
+<div class="relative flex-1 w-full rounded-lg bg-surface-dim overflow-hidden flex flex-col justify-between shadow-2xl">
+<!-- SCANLINE & GRID SIMULATION OVERLAY -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none opacity-40"></div>
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.06)_0%,rgba(11,14,21,0.9)_100%)] pointer-events-none"></div>
+<!-- FOUR CORNER L-SHAPED NEON CYAN HUD BRACKETS -->
+<div class="absolute top-3 left-3 flex flex-col gap-1 pointer-events-none z-20">
+<div class="w-8 h-8 flex items-start justify-start">
+<svg class="w-full h-full text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 32 32">
+<path d="M0 24 V2 H24"></path>
+</svg>
+</div>
+<span class="font-label-sm text-label-sm text-primary/70 tracking-widest pl-1 font-mono">[X:104.22 // Y:890.11]</span>
+</div>
+<div class="absolute top-3 right-3 flex flex-col items-end gap-1 pointer-events-none z-20">
+<div class="w-8 h-8 flex items-start justify-end">
+<svg class="w-full h-full text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 32 32">
+<path d="M8 2 H30 V24"></path>
+</svg>
+</div>
+<span class="font-label-sm text-label-sm text-primary/70 tracking-widest pr-1 font-mono">[SYS_NODE::ONLINE]</span>
+</div>
+<div class="absolute bottom-16 left-3 flex flex-col gap-1 pointer-events-none z-20">
+<span class="font-label-sm text-label-sm text-primary/70 tracking-widest pl-1 font-mono">[FREQ::944.20 MHz]</span>
+<div class="w-8 h-8 flex items-end justify-start">
+<svg class="w-full h-full text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 32 32">
+<path d="M0 8 V30 H24"></path>
+</svg>
+</div>
+</div>
+<div class="absolute bottom-16 right-3 flex flex-col items-end gap-1 pointer-events-none z-20">
+<span class="font-label-sm text-label-sm text-primary/70 tracking-widest pr-1 font-mono">[TARGET::ACQUIRED]</span>
+<div class="w-8 h-8 flex items-end justify-end">
+<svg class="w-full h-full text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 32 32">
+<path d="M8 30 H30 V8"></path>
+</svg>
+</div>
+</div>
+<!-- TOP STREAM HUD TELEMETRY OVERLAY -->
+<div class="relative z-10 p-space-md flex flex-wrap items-start justify-between gap-space-sm">
+<!-- Monospace Violet HUD pill -->
+<div class="px-3 py-1.5 rounded bg-surface-dim/85 backdrop-blur-md shadow-md flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+<span class="font-label-sm text-label-sm text-secondary font-mono tracking-wider">
+              [RES: 1920x1080p | FPS: 60 | RTT: 23ms | LOSS: 0.00% | CODEC: AV1/OPUS]
+            </span>
+</div>
+<!-- Top-Right Indicator: Stream Host -->
+<div class="flex items-center gap-space-sm">
+<div class="px-2.5 py-1 rounded bg-error-container/40 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-error font-bold tracking-widest">REC::LIVE</span>
+</div>
+<div class="px-3 py-1 rounded bg-surface-dim/85 backdrop-blur-md shadow-sm">
+<span class="font-label-sm text-label-sm text-primary font-mono tracking-wide">[STREAM_HOST::K3RN3L_PHANTOM]</span>
+</div>
+</div>
+</div>
+<!-- CENTRAL STREAM SIMULATION: CYBERNETIC DECK INTERFACE -->
+<div class="relative z-0 flex-1 flex items-center justify-center p-space-md select-none overflow-hidden">
+<!-- Tactical Reticle & Hex Core (Inspired by user design motif) -->
+<div class="relative w-80 h-80 sm:w-96 sm:h-96 flex items-center justify-center">
+<!-- Rotating Hexagonal Outer Boundary -->
+<div class="absolute inset-0 flex items-center justify-center animate-[spin_40s_linear_infinite] opacity-60">
+<svg class="w-full h-full text-primary" fill="none" stroke="currentColor" stroke-width="1" viewbox="0 0 100 100">
+<polygon points="50,3 93,25 93,75 50,97 7,75 7,25" stroke-dasharray="4, 3"></polygon>
+</svg>
+</div>
+<!-- Secondary Inner Violet Hex -->
+<div class="absolute inset-4 flex items-center justify-center animate-[spin_25s_linear_infinite_reverse] opacity-80">
+<svg class="w-full h-full text-secondary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 100 100">
+<polygon points="50,5 89,27 89,73 50,95 11,73 11,27" stroke-dasharray="6, 4"></polygon>
+</svg>
+</div>
+<!-- Central Radar Target -->
+<div class="absolute inset-16 rounded-full bg-surface-dim/80 flex items-center justify-center shadow-2xl">
+<!-- Concentric Radar Rings -->
+<div class="w-full h-full rounded-full flex items-center justify-center relative">
+<div class="absolute inset-4 rounded-full bg-surface-container-high/40 flex items-center justify-center">
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="w-4 h-4 rounded-full bg-primary animate-ping"></span>
+</div>
+</div>
+<!-- Crosshairs -->
+<div class="absolute h-full w-[1px] bg-secondary/70"></div>
+<div class="absolute w-full h-[1px] bg-secondary/70"></div>
+</div>
+</div>
+<!-- Glitch Terminal Feed Mockup Windows inside stream -->
+<div class="absolute -top-4 -left-6 px-3 py-2 rounded bg-surface-dim/95 backdrop-blur-md shadow-lg max-w-[210px] hidden sm:block">
+<div class="flex items-center justify-between text-[10px] font-mono text-tertiary mb-1">
+<span>SEC_STREAM_01</span>
+<span>ENC: ACTIVE</span>
+</div>
+<div class="text-[9px] font-mono text-outline space-y-0.5 leading-tight">
+<p>&gt; ice_bind: 192.168.1.109:4492</p>
+<p>&gt; payload: h264_av1_rtp</p>
+<p class="text-primary">&gt; frames: 60/60 [OK]</p>
+</div>
+</div>
+<div class="absolute -bottom-4 -right-6 px-3 py-2 rounded bg-surface-dim/95 backdrop-blur-md shadow-lg max-w-[210px] hidden sm:block">
+<div class="flex items-center justify-between text-[10px] font-mono text-secondary mb-1">
+<span>AUDIO_DSP_CORE</span>
+<span>OPUS_STEREO</span>
+</div>
+<div class="text-[9px] font-mono text-outline space-y-0.5 leading-tight">
+<p>&gt; sample_rate: 48.0kHz</p>
+<p>&gt; gain: +3.2dB [NOISE_GATE]</p>
+<p class="text-secondary">&gt; dsp_latency: 1.2ms</p>
+</div>
+</div>
+</div>
+</div>
+<!-- DYNAMIC SPECTRUM ANALYZER AUDIO VISUALIZER (INTEGRATED AT BOTTOM OF STREAM) -->
+<div class="relative z-10 w-full px-space-md py-space-xs bg-surface-dim/90 backdrop-blur-md flex items-end justify-between gap-1 h-14">
+<div class="hidden md:flex flex-col justify-end pb-1">
+<span class="font-label-sm text-label-sm text-secondary font-bold font-mono">AUDIO_FEED::MULTICAST</span>
+<span class="font-label-sm text-label-sm text-outline">CH_01_STEREO</span>
+</div>
+<!-- Dynamic Audio Bars -->
+<div class="flex-1 flex items-end justify-center gap-1.5 h-10 px-space-sm" id="audio-visualizer">
+<!-- 28 Bars generated via HTML / animated with inline styles -->
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 35%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 60%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 85%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 40%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 95%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 70%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 50%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 30%;"></div>
+<div class="w-1.5 bg-tertiary rounded-t transition-all duration-75" style="height: 65%;"></div>
+<div class="w-1.5 bg-tertiary rounded-t transition-all duration-75" style="height: 80%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 100%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 55%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 45%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 75%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 90%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 35%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 60%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 85%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 40%;"></div>
+<div class="w-1.5 bg-tertiary rounded-t transition-all duration-75" style="height: 70%;"></div>
+<div class="w-1.5 bg-tertiary rounded-t transition-all duration-75" style="height: 95%;"></div>
+<div class="w-1.5 bg-primary rounded-t transition-all duration-75" style="height: 50%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 30%;"></div>
+<div class="w-1.5 bg-secondary rounded-t transition-all duration-75" style="height: 75%;"></div>
+</div>
+<div class="hidden md:flex flex-col items-end justify-end pb-1 font-mono">
+<span class="font-label-sm text-label-sm text-tertiary font-bold">PEAK: -1.4 dB</span>
+<span class="font-label-sm text-label-sm text-outline">CLIP_GUARD::ON</span>
+</div>
+</div>
+</div>
+<!-- ============================================================ -->
+<!-- QUANTUM ACTION BAR: FLOATING PILL AT BOTTOM CENTER          -->
+<!-- ============================================================ -->
+<div class="mt-space-sm flex items-center justify-center w-full z-30">
+<div class="px-space-md py-2 rounded-full bg-surface-dim/90 backdrop-blur-xl shadow-2xl flex items-center gap-space-sm sm:gap-space-md flex-wrap justify-center">
+<!-- Micro Mute Pill Button -->
+<button class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright flex items-center gap-1.5 text-tertiary transition-all shadow-sm" id="pill-mic-btn">
+<span class="material-symbols-outlined text-[18px]">mic</span>
+<span class="font-label-sm text-label-sm font-bold uppercase hidden sm:inline">Mute</span>
+</button>
+<!-- Deafen Pill Button -->
+<button class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright flex items-center gap-1.5 text-on-surface-variant transition-all shadow-sm" id="pill-deafen-btn">
+<span class="material-symbols-outlined text-[18px]">headphones</span>
+<span class="font-label-sm text-label-sm font-bold uppercase hidden sm:inline">Deafen</span>
+</button>
+<!-- CENTERPIECE: INITIATE LINK / SHARE SCREEN BUTTON -->
+<button class="px-5 py-2 rounded-full bg-primary text-on-primary font-headline-md text-[13px] font-bold tracking-wider uppercase flex items-center gap-2 shadow-lg hover:brightness-110 active:scale-95 transition-all" id="share-screen-btn">
+<span class="material-symbols-outlined text-[20px]">screen_share</span>
+<span>SHARE SCREEN</span>
+</button>
+<!-- Stream Quality Dropdown Pill -->
+<div class="relative group">
+<button class="px-3 py-1.5 rounded-full bg-surface-container flex items-center gap-1 text-primary shadow-sm hover:bg-surface-bright transition-colors" id="quality-selector-btn">
+<span class="font-label-sm text-label-sm font-bold" id="quality-label">1080p60</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-surface-dim p-1 rounded shadow-2xl z-50 min-w-[120px]" id="quality-dropdown">
+<button class="quality-opt w-full text-left px-2 py-1 rounded text-primary hover:bg-surface-container font-label-sm text-label-sm font-mono block" data-quality="720p30">720p30</button>
+<button class="quality-opt w-full text-left px-2 py-1 rounded text-primary hover:bg-surface-container font-label-sm text-label-sm font-mono block" data-quality="1080p60">1080p60 [DEF]</button>
+<button class="quality-opt w-full text-left px-2 py-1 rounded text-primary hover:bg-surface-container font-label-sm text-label-sm font-mono block" data-quality="4K_STREAM">4K UHD</button>
+<button class="quality-opt w-full text-left px-2 py-1 rounded text-primary hover:bg-surface-container font-label-sm text-label-sm font-mono block" data-quality="SOURCE">SOURCE DIRECT</button>
+</div>
+</div>
+<!-- Disconnect Button -->
+<button class="px-3.5 py-1.5 rounded-full bg-error-container/30 text-error hover:bg-error hover:text-on-error transition-all shadow-sm flex items-center gap-1.5" title="Disconnect Session">
+<span class="material-symbols-outlined text-[18px]">call_end</span>
+<span class="font-label-sm text-label-sm font-bold uppercase hidden md:inline">LEAVE</span>
+</button>
+<!-- Right Utility: PiP and Fullscreen -->
+<div class="flex items-center gap-1 pl-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors" title="Picture-in-Picture">
+<span class="material-symbols-outlined text-[18px]">picture_in_picture_alt</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors" title="Fullscreen">
+<span class="material-symbols-outlined text-[18px]">fullscreen</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- ============================================================ -->
+<!-- RIGHT PANEL: INTEGRATED COMMAND CENTER (TERMINAL & CONFIG)   -->
+<!-- ============================================================ -->
+<aside class="w-80 lg:w-96 bg-surface-dim/80 flex flex-col shrink-0 transition-all duration-300 relative border-l border-outline-variant/20" id="sidebar-right">
+<!-- DUAL PANE TAB SWITCHER HEADER -->
+<div class="h-10 bg-surface-container-lowest/80 flex items-center justify-between p-1">
+<div class="flex items-center gap-1 flex-1">
+<button class="flex-1 py-1 px-2 rounded font-label-sm text-label-sm tracking-wider uppercase font-bold text-primary bg-surface-container transition-all flex items-center justify-center gap-1" id="tab-terminal-btn">
+<span class="material-symbols-outlined text-[15px]">terminal</span>
+<span>TERMINAL.LOG</span>
+</button>
+<button class="flex-1 py-1 px-2 rounded font-label-sm text-label-sm tracking-wider uppercase font-bold text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-1" id="tab-config-btn">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+<span>WEBRTC.CONFIG</span>
+</button>
+</div>
+<button class="text-outline hover:text-primary p-1 ml-1" id="toggle-command-btn" title="Toggle Command Center">
+<span class="material-symbols-outlined text-[18px]">dock_to_right</span>
+</button>
+</div>
+<!-- PANE 1: TERMINAL (TEXT CHAT & EVENT BUS) -->
+<div class="flex-1 flex flex-col min-h-0" id="pane-terminal">
+<!-- Live Hacker Terminal Log List -->
+<div class="flex-1 overflow-y-auto p-space-sm space-y-space-xs font-mono text-xs" id="terminal-scroll-area">
+<div class="p-1.5 rounded bg-surface-container-lowest/60">
+<span class="text-outline">[14:32:01]</span>
+<span class="text-tertiary">[sys_daemon]:</span>
+<span class="text-on-surface-variant">ICE candidate relay connected [10.240.12.8]</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest/60">
+<span class="text-outline">[14:32:05]</span>
+<span class="text-secondary">[u_18A_K3RN3L]:</span>
+<span class="text-on-surface">Screen stream initialized at 1080p60.</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest/60">
+<span class="text-outline">[14:32:19]</span>
+<span class="text-primary">[u_92F_NYX]:</span>
+<span class="text-on-surface-variant">Audio link clear, latency under 20ms.</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest/60">
+<span class="text-outline">[14:32:44]</span>
+<span class="text-tertiary">[OP_VALKYRIE]:</span>
+<span class="text-on-surface">Uploading target subsystem schematic now...</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-low">
+<span class="text-outline">[14:33:02]</span>
+<span class="text-error">[sys_kernel]:</span>
+<span class="text-error font-bold">WARNING: High ingress throughput detected on peer socket #4</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest/60">
+<span class="text-outline">[14:33:15]</span>
+<span class="text-secondary">[u_18A_K3RN3L]:</span>
+<span class="text-on-surface">Adjusted AV1 bit-allocation matrix. Nominal now.</span>
+</div>
+</div>
+<!-- Glitch Prompt Input Box -->
+<div class="p-space-sm bg-surface-container-low">
+<form class="flex flex-col gap-1.5" id="terminal-form">
+<div class="relative flex items-center">
+<span class="absolute left-2.5 text-primary font-mono text-sm">&gt;</span>
+<input autocomplete="off" class="w-full bg-surface-container-lowest text-primary font-mono text-xs rounded pl-7 pr-3 py-2 outline-none focus:bg-surface-container-high transition-colors" id="terminal-input" placeholder="Enter command or payload..." type="text"/>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline font-mono">SYS_STREAM::READY</span>
+<button class="px-3 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm font-bold uppercase hover:brightness-110 transition-all flex items-center gap-1" type="submit">
+<span>TRANSMIT</span>
+<span class="material-symbols-outlined text-[13px]">subdirectory_arrow_left</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- PANE 2: CONFIG (CONNECTION & PROTOCOL SETTINGS - HIDDEN BY DEFAULT) -->
+<div class="hidden flex-1 overflow-y-auto p-space-sm space-y-space-md" id="pane-config">
+<!-- Connection Params -->
+<div class="p-space-sm rounded bg-surface-container-low space-y-space-xs">
+<span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider block">WebRTC Session Parameters</span>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-outline block">ROOM IDENTIFIER</label>
+<input class="w-full bg-surface-container-lowest text-on-surface font-mono text-xs rounded px-2.5 py-1.5 outline-none font-bold" readonly="" type="text" value="CELL_01A_HEX99"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-outline block">SIGNALING SERVER URL</label>
+<input class="w-full bg-surface-container-lowest text-primary font-mono text-xs rounded px-2.5 py-1.5 outline-none" type="text" value="wss://signal.cyberlink.mesh:8443/v4"/>
+</div>
+</div>
+<!-- Toggle Controls Bank -->
+<div class="p-space-sm rounded bg-surface-container-low space-y-space-sm">
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider block">Media Processing DSP</span>
+<!-- Toggle 1 -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">SYS_AUDIO_LOOPBACK</span>
+<span class="font-label-sm text-label-sm text-outline">Echo cancellation channel</span>
+</div>
+<button class="cfg-toggle w-10 h-5 rounded-full bg-primary p-0.5 flex items-center justify-end transition-colors" data-active="true">
+<span class="w-4 h-4 rounded-full bg-on-primary"></span>
+</button>
+</div>
+<!-- Toggle 2 -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">MIC_DSP_SUPPRESSION</span>
+<span class="font-label-sm text-label-sm text-outline">Dynamic neural filtering</span>
+</div>
+<button class="cfg-toggle w-10 h-5 rounded-full bg-primary p-0.5 flex items-center justify-end transition-colors" data-active="true">
+<span class="w-4 h-4 rounded-full bg-on-primary"></span>
+</button>
+</div>
+<!-- Toggle 3 -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">SIMULCAST_AV1</span>
+<span class="font-label-sm text-label-sm text-outline">Multi-bitrate packet slicing</span>
+</div>
+<button class="cfg-toggle w-10 h-5 rounded-full bg-primary p-0.5 flex items-center justify-end transition-colors" data-active="true">
+<span class="w-4 h-4 rounded-full bg-on-primary"></span>
+</button>
+</div>
+</div>
+<!-- SDP Protocol Inspection Trigger -->
+<div class="p-space-sm rounded bg-surface-container-low space-y-space-xs">
+<span class="font-label-sm text-label-sm text-tertiary font-bold uppercase tracking-wider block">Raw Signaling Packet</span>
+<p class="font-body-sm text-body-sm text-outline">Direct P2P session negotiation payload inspection.</p>
+<button class="w-full py-2 rounded bg-surface-dim hover:bg-surface-container text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 shadow-sm" id="open-sdp-btn">
+<span class="material-symbols-outlined text-[16px]">data_object</span>
+<span>INSPECT SDP PROTOCOL</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+<!-- ============================================================ -->
+<!-- BOTTOM STATUS TICKER: SYSTEM RECURRING LINK & PACKET BAR     -->
+<!-- ============================================================ -->
+<footer class="h-7 bg-surface-dim px-space-md flex items-center justify-between shrink-0 font-label-sm text-label-sm text-outline overflow-hidden border-t border-outline-variant/20">
+<div class="flex items-center gap-space-md truncate">
+<span class="text-tertiary font-bold">SYSTEM_OK::MESH_CONNECTED</span>
+<span>|</span>
+<span class="text-on-surface-variant truncate">ACTIVE_ROOM: CELL_01A::CYBER_SPACE [AES-GCM-256]</span>
+<span class="hidden md:inline">|</span>
+<span class="hidden md:inline">ICE_CANDIDATE: srflx 198.51.100.42:54890</span>
+</div>
+<div class="flex items-center gap-space-md shrink-0">
+<span class="font-mono text-primary hidden sm:inline">PKT_LOSS: 0.00%</span>
+<span class="font-mono text-secondary">AUDIO_CH: 2</span>
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+</div>
+</footer>
+<!-- ============================================================ -->
+<!-- MODAL: SDP PROTOCOL EXCHANGE INSPECTOR                       -->
+<!-- ============================================================ -->
+<div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden" id="sdp-modal">
+<div class="w-full max-w-2xl bg-surface-dim rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+<div class="px-space-md py-space-sm bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">sync_alt</span>
+<span class="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">SDP_PROTOCOL::OFFER_ANSWER_INSPECTOR</span>
+</div>
+<button class="text-outline hover:text-on-surface p-1" id="close-sdp-btn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-md overflow-y-auto space-y-space-sm font-mono text-xs text-on-surface-variant flex-1 bg-surface-container-lowest">
+<div class="p-2 rounded bg-surface-dim space-y-1">
+<span class="text-primary font-bold">// LOCAL_OFFER_SESSION_DESCRIPTION (RFC 4566)</span>
+<p class="text-outline">v=0</p>
+<p class="text-outline">o=OPR_VALKYRIE 2890844526 2890842807 IN IP4 10.240.12.8</p>
+<p class="text-outline">s=CYBER_LINK Realtime Session Descriptor</p>
+<p class="text-outline">t=0 0</p>
+<p class="text-secondary">m=video 51372 RTP/SAVPF 96 97 98</p>
+<p class="text-tertiary">a=rtpmap:96 AV1/90000</p>
+<p class="text-tertiary">a=rtcp-fb:96 nack pli goog-remb</p>
+<p class="text-secondary">m=audio 51374 RTP/SAVPF 111</p>
+<p class="text-tertiary">a=rtpmap:111 opus/48000/2</p>
+<p class="text-primary">a=fingerprint:sha-256 4A:AD:B9:B1:3F:24:CE:5E:B2:FC:23:04:8B:C0:E4:C9:7D:FD:90:3A:82:48:8D:18:6B:8F:A1:88:DF:4C:E6:9A</p>
+</div>
+</div>
+<div class="px-space-md py-space-sm bg-surface-container-low flex justify-end gap-space-sm">
+<button class="px-3 py-1.5 rounded bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary transition-all font-label-sm text-label-sm font-bold uppercase" id="copy-sdp-btn">
+          COPY PAYLOAD
+        </button>
+<button class="px-4 py-1.5 rounded bg-primary text-on-primary font-label-sm text-label-sm font-bold uppercase hover:brightness-110" id="confirm-sdp-btn">
+          CLOSE
+        </button>
+</div>
+</div>
+</div>
+<!-- CYBERNETIC TOAST NOTIFICATION CONTAINER -->
+<div class="fixed bottom-12 right-6 z-50 pointer-events-none flex flex-col gap-2" id="toast-container"></div>
+</div>
+<!-- INTERACTIVE SCRIPT LOGIC -->
+<script>
+  (function () {
+    // 1. Toast Notification Helper
+    function showCyberToast(title, msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const isWarn = type === 'warn';
+      const isSuccess = type === 'success';
+
+      let accentClass = 'text-primary bg-primary/20';
+      if (isWarn) accentClass = 'text-error bg-error/20';
+      if (isSuccess) accentClass = 'text-tertiary bg-tertiary/20';
+
+      toast.className = 'pointer-events-auto px-3.5 py-2.5 rounded bg-surface-dim shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0';
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full ${isWarn ? 'bg-error' : isSuccess ? 'bg-tertiary' : 'bg-primary'} animate-pulse"></span>
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm font-bold uppercase tracking-wider ${isWarn ? 'text-error' : isSuccess ? 'text-tertiary' : 'text-primary'}">${title}</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant font-mono">${msg}</span>
+        </div>
+      `;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-x-6');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // 2. Tab Switcher (Terminal vs Config)
+    const tabTerminalBtn = document.getElementById('tab-terminal-btn');
+    const tabConfigBtn = document.getElementById('tab-config-btn');
+    const paneTerminal = document.getElementById('pane-terminal');
+    const paneConfig = document.getElementById('pane-config');
+
+    if (tabTerminalBtn && tabConfigBtn) {
+      tabTerminalBtn.addEventListener('click', () => {
+        paneTerminal.classList.remove('hidden');
+        paneConfig.classList.add('hidden');
+        tabTerminalBtn.classList.add('text-primary', 'bg-surface-container');
+        tabTerminalBtn.classList.remove('text-on-surface-variant');
+        tabConfigBtn.classList.remove('text-primary', 'bg-surface-container');
+        tabConfigBtn.classList.add('text-on-surface-variant');
+      });
+
+      tabConfigBtn.addEventListener('click', () => {
+        paneConfig.classList.remove('hidden');
+        paneTerminal.classList.add('hidden');
+        tabConfigBtn.classList.add('text-primary', 'bg-surface-container');
+        tabConfigBtn.classList.remove('text-on-surface-variant');
+        tabTerminalBtn.classList.remove('text-primary', 'bg-surface-container');
+        tabTerminalBtn.classList.add('text-on-surface-variant');
+      });
+    }
+
+    // 3. Audio Visualizer Pulse Simulator
+    const audioContainer = document.getElementById('audio-visualizer');
+    if (audioContainer) {
+      const bars = audioContainer.querySelectorAll('div');
+      setInterval(() => {
+        bars.forEach(bar => {
+          const randomHeight = Math.floor(Math.random() * 85) + 15;
+          bar.style.height = randomHeight + '%';
+        });
+      }, 110);
+    }
+
+    // 4. Live Bitrate Counter Variance
+    const bitrateEl = document.getElementById('live-bitrate');
+    if (bitrateEl) {
+      setInterval(() => {
+        const val = 4750 + Math.floor(Math.random() * 210);
+        bitrateEl.textContent = val.toLocaleString() + ' kbps';
+      }, 1500);
+    }
+
+    // 5. Terminal Log Submission
+    const terminalForm = document.getElementById('terminal-form');
+    const terminalInput = document.getElementById('terminal-input');
+    const terminalScroll = document.getElementById('terminal-scroll-area');
+
+    if (terminalForm && terminalInput && terminalScroll) {
+      terminalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = terminalInput.value.trim();
+        if (!text) return;
+
+        const time = new Date().toTimeString().split(' ')[0];
+        const newMsg = document.createElement('div');
+        newMsg.className = 'p-1.5 rounded bg-surface-container-low shadow-sm';
+        newMsg.innerHTML = `
+          <span class="text-outline">[${time}]</span>
+          <span class="text-primary font-bold">[OP_VALKYRIE]:</span>
+          <span class="text-on-surface">${escapeHtml(text)}</span>
+        `;
+        terminalScroll.appendChild(newMsg);
+        terminalInput.value = '';
+        terminalScroll.scrollTop = terminalScroll.scrollHeight;
+
+        showCyberToast('PAYLOAD_DISPATCHED', 'Data chunk routed through ICE mesh.');
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // 6. Mic / Deafen Micro-Interactions
+    let isMuted = false;
+    let isDeafened = false;
+
+    const micBtn = document.getElementById('mic-toggle-btn');
+    const pillMicBtn = document.getElementById('pill-mic-btn');
+    const deafenBtn = document.getElementById('deafen-toggle-btn');
+    const pillDeafenBtn = document.getElementById('pill-deafen-btn');
+
+    function updateMicState() {
+      isMuted = !isMuted;
+      const icon = isMuted ? 'mic_off' : 'mic';
+      const color = isMuted ? 'text-error' : 'text-primary';
+      const pillColor = isMuted ? 'text-error' : 'text-tertiary';
+      const label = isMuted ? 'UNMUTE' : 'MUTE';
+
+      if (micBtn) {
+        micBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">${icon}</span>`;
+        micBtn.className = `flex-1 py-1.5 rounded bg-surface-container flex items-center justify-center ${color} transition-colors`;
+      }
+      if (pillMicBtn) {
+        pillMicBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">${icon}</span>
+          <span class="font-label-sm text-label-sm font-bold uppercase hidden sm:inline">${label}</span>
+        `;
+        pillMicBtn.className = `px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright flex items-center gap-1.5 ${pillColor} transition-all shadow-sm`;
+      }
+
+      showCyberToast(isMuted ? 'AUDIO_MUTED' : 'AUDIO_TRANSMITTING', isMuted ? 'Local audio capture suspended.' : 'Direct audio channel uninhibited.', isMuted ? 'warn' : 'info');
+    }
+
+    if (micBtn) micBtn.addEventListener('click', updateMicState);
+    if (pillMicBtn) pillMicBtn.addEventListener('click', updateMicState);
+
+    function updateDeafenState() {
+      isDeafened = !isDeafened;
+      const icon = isDeafened ? 'headset_off' : 'headphones';
+      const color = isDeafened ? 'text-error' : 'text-on-surface-variant';
+      const label = isDeafened ? 'UNDEAFEN' : 'DEAFEN';
+
+      if (deafenBtn) {
+        deafenBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">${icon}</span>`;
+        deafenBtn.className = `flex-1 py-1.5 rounded bg-surface-container flex items-center justify-center ${color} transition-colors`;
+      }
+      if (pillDeafenBtn) {
+        pillDeafenBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">${icon}</span>
+          <span class="font-label-sm text-label-sm font-bold uppercase hidden sm:inline">${label}</span>
+        `;
+        pillDeafenBtn.className = `px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-bright flex items-center gap-1.5 ${color} transition-all shadow-sm`;
+      }
+
+      showCyberToast(isDeafened ? 'DEAFENED' : 'AUDIO_OUTPUT_RESTORED', isDeafened ? 'Output streams silenced.' : 'All incoming sound routes active.', isDeafened ? 'warn' : 'info');
+    }
+
+    if (deafenBtn) deafenBtn.addEventListener('click', updateDeafenState);
+    if (pillDeafenBtn) pillDeafenBtn.addEventListener('click', updateDeafenState);
+
+    // 7. Quality Selector Dropdown
+    const qualityLabel = document.getElementById('quality-label');
+    const qualityOptions = document.querySelectorAll('.quality-opt');
+    qualityOptions.forEach(opt => {
+      opt.addEventListener('click', () => {
+        const val = opt.getAttribute('data-quality');
+        if (qualityLabel) qualityLabel.textContent = val;
+        showCyberToast('RESOLUTION_SHIFT', `WebRTC transport target set to ${val}.`, 'success');
+      });
+    });
+
+    // 8. SDP Modal Handler
+    const sdpModal = document.getElementById('sdp-modal');
+    const openSdpBtn = document.getElementById('open-sdp-btn');
+    const closeSdpBtn = document.getElementById('close-sdp-btn');
+    const confirmSdpBtn = document.getElementById('confirm-sdp-btn');
+    const copySdpBtn = document.getElementById('copy-sdp-btn');
+
+    if (openSdpBtn && sdpModal) {
+      openSdpBtn.addEventListener('click', () => sdpModal.classList.remove('hidden'));
+    }
+    if (closeSdpBtn && sdpModal) {
+      closeSdpBtn.addEventListener('click', () => sdpModal.classList.add('hidden'));
+    }
+    if (confirmSdpBtn && sdpModal) {
+      confirmSdpBtn.addEventListener('click', () => sdpModal.classList.add('hidden'));
+    }
+    if (copySdpBtn) {
+      copySdpBtn.addEventListener('click', () => {
+        showCyberToast('CLIPBOARD_EXCHANGE', 'SDP payload copied to memory buffer.', 'success');
+      });
+    }
+
+    // 9. Config Toggles
+    const toggles = document.querySelectorAll('.cfg-toggle');
+    toggles.forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const isActive = toggle.getAttribute('data-active') === 'true';
+        toggle.setAttribute('data-active', !isActive);
+        if (!isActive) {
+          toggle.classList.remove('bg-surface-container-highest', 'justify-start');
+          toggle.classList.add('bg-primary', 'justify-end');
+          toggle.firstElementChild.classList.remove('bg-outline');
+          toggle.firstElementChild.classList.add('bg-on-primary');
+          showCyberToast('DSP_STATE_MODIFIED', 'Subsystem active.', 'success');
+        } else {
+          toggle.classList.remove('bg-primary', 'justify-end');
+          toggle.classList.add('bg-surface-container-highest', 'justify-start');
+          toggle.firstElementChild.classList.remove('bg-on-primary');
+          toggle.firstElementChild.classList.add('bg-outline');
+          showCyberToast('DSP_STATE_MODIFIED', 'Subsystem disengaged.', 'warn');
+        }
+      });
+    });
+
+    // 10. Share Screen Trigger Micro-Feedback
+    const shareBtn = document.getElementById('share-screen-btn');
+    let isSharing = false;
+    if (shareBtn) {
+      shareBtn.addEventListener('click', () => {
+        isSharing = !isSharing;
+        if (isSharing) {
+          shareBtn.classList.remove('bg-primary', 'text-on-primary');
+          shareBtn.classList.add('bg-secondary', 'text-on-secondary');
+          shareBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[20px]">stop_screen_share</span>
+            <span>STOP SHARING</span>
+          `;
+          showCyberToast('DISPLAY_CAPTURE_ENGAGED', 'Screen multicast pipeline linked to peer cluster.', 'success');
+        } else {
+          shareBtn.classList.remove('bg-secondary', 'text-on-secondary');
+          shareBtn.classList.add('bg-primary', 'text-on-primary');
+          shareBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[20px]">screen_share</span>
+            <span>SHARE SCREEN</span>
+          `;
+          showCyberToast('FEED_TERMINATED', 'Local display stream severed.', 'warn');
+        }
+      });
+    }
+
+    // 11. Left & Right Sidebar Collapsible toggles
+    const toggleRoomsBtn = document.getElementById('toggle-rooms-btn');
+    const sidebarLeft = document.getElementById('sidebar-left');
+    if (toggleRoomsBtn && sidebarLeft) {
+      toggleRoomsBtn.addEventListener('click', () => {
+        sidebarLeft.classList.toggle('w-72');
+        sidebarLeft.classList.toggle('w-0');
+        sidebarLeft.classList.toggle('overflow-hidden');
+      });
+    }
+
+    const toggleCommandBtn = document.getElementById('toggle-command-btn');
+    const sidebarRight = document.getElementById('sidebar-right');
+    if (toggleCommandBtn && sidebarRight) {
+      toggleCommandBtn.addEventListener('click', () => {
+        sidebarRight.classList.toggle('w-80');
+        sidebarRight.classList.toggle('lg:w-96');
+        sidebarRight.classList.toggle('w-0');
+        sidebarRight.classList.toggle('overflow-hidden');
+      });
+    }
+
+  })();
+</script></main></div></body></html>

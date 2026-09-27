@@ -18,16 +18,28 @@ const staticDir = fs.existsSync(path.join(__dirname, 'dist'))
   ? path.join(__dirname, 'dist')
   : path.join(__dirname, 'public');
 
+// Security HTTP Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'display-capture=(self), camera=(), microphone=(self)');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' ws: wss: stun:; media-src 'self' blob:; img-src 'self' data: blob:;"
+  );
+  next();
+});
+
 app.use(express.static(staticDir));
 
-// Basic system health check
+// Basic system health check - sanitized output
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
     system: 'SYNAPSE_SIGNALING_CORE',
     version: '1.1.0',
-    timestamp: new Date().toISOString(),
-    activeRooms: rooms.size
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -36,11 +48,42 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(staticDir, 'index.html'));
 });
 
-// WebSocket Signaling Server
-const wss = new WebSocketServer({ server });
+// WebSocket Signaling Server with 64KB max payload protection against memory exhaustion
+const MAX_PAYLOAD_BYTES = 64 * 1024; // 64 KB
+const MAX_PEERS_PER_ROOM = 8;
+const MAX_ACTIVE_ROOMS = 500;
+const RATE_LIMIT_WINDOW_MS = 5000;
+const RATE_LIMIT_MAX_MESSAGES = 60;
+
+const wss = new WebSocketServer({
+  server,
+  maxPayload: MAX_PAYLOAD_BYTES
+});
 
 // Map<roomId, Map<peerId, { ws: WebSocket, peerId: string, joinedAt: number }>>
 const rooms = new Map();
+
+// Input Validation Helpers
+const ID_REGEX = /^[A-Za-z0-9_-]{3,64}$/;
+function isValidId(id) {
+  return typeof id === 'string' && ID_REGEX.test(id);
+}
+
+function isValidSdp(sdp) {
+  if (!sdp || typeof sdp !== 'object') return false;
+  if (sdp.type !== 'offer' && sdp.type !== 'answer') return false;
+  if (typeof sdp.sdp !== 'string' || sdp.sdp.length > 32768) return false;
+  return true;
+}
+
+function isValidCandidate(candidate) {
+  if (candidate === null) return true; // End-of-candidates notification
+  if (!candidate || typeof candidate !== 'object') return false;
+  if (typeof candidate.candidate !== 'string' || candidate.candidate.length > 2048) return false;
+  if (candidate.sdpMid !== null && candidate.sdpMid !== undefined && typeof candidate.sdpMid !== 'string') return false;
+  if (candidate.sdpMLineIndex !== null && candidate.sdpMLineIndex !== undefined && typeof candidate.sdpMLineIndex !== 'number') return false;
+  return true;
+}
 
 function log(msg, level = 'INFO') {
   const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
@@ -84,23 +127,79 @@ function removeClientFromRoom(ws) {
   ws.peerId = null;
 }
 
+const ALLOWED_MESSAGE_TYPES = new Set([
+  'join-room',
+  'offer',
+  'answer',
+  'ice-candidate',
+  'leave-room',
+  'ping'
+]);
+
 wss.on('connection', (ws, req) => {
   ws.isAlive = true;
+  ws.messageCount = 0;
+  ws.lastRateReset = Date.now();
+
   ws.on('pong', () => {
     ws.isAlive = true;
   });
 
-  log(`New WebRTC signaling connection from ${req.socket.remoteAddress}`, 'CONNECT');
+  const remoteIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  log(`New WebRTC signaling connection from ${remoteIp}`, 'CONNECT');
 
   ws.on('message', (messageRaw) => {
     try {
-      const message = JSON.parse(messageRaw);
-      const { type, roomId, peerId, target, sdp, candidate, payload } = message;
+      // 1. Rate Limiting Protection (Anti-DoS / Anti-Flooding)
+      const now = Date.now();
+      if (now - ws.lastRateReset > RATE_LIMIT_WINDOW_MS) {
+        ws.messageCount = 1;
+        ws.lastRateReset = now;
+      } else {
+        ws.messageCount++;
+        if (ws.messageCount > RATE_LIMIT_MAX_MESSAGES) {
+          log(`Rate limit exceeded for socket (${ws.peerId || 'anonymous'})`, 'SECURITY');
+          safeSend(ws, { type: 'error', message: 'Signaling rate limit exceeded. Please slow down.' });
+          return;
+        }
+      }
+
+      // 2. Safe Parsing
+      let message;
+      try {
+        message = JSON.parse(messageRaw);
+      } catch {
+        safeSend(ws, { type: 'error', message: 'Malformed JSON payload' });
+        return;
+      }
+
+      if (!message || typeof message !== 'object') {
+        safeSend(ws, { type: 'error', message: 'Invalid payload format' });
+        return;
+      }
+
+      const { type, roomId, peerId, target, sdp, candidate } = message;
+
+      if (!ALLOWED_MESSAGE_TYPES.has(type)) {
+        log(`Rejected unauthorized message type: ${type}`, 'SECURITY');
+        safeSend(ws, { type: 'error', message: 'Unauthorized message type' });
+        return;
+      }
 
       switch (type) {
         case 'join-room': {
-          if (!roomId || !peerId) {
-            safeSend(ws, { type: 'error', message: 'Missing roomId or peerId' });
+          if (!isValidId(roomId) || !isValidId(peerId)) {
+            safeSend(ws, {
+              type: 'error',
+              message: 'Invalid roomId or peerId format (3-64 alphanumeric characters, underscores or hyphens required)'
+            });
+            return;
+          }
+
+          // Check global room quota if creating a new room
+          if (!rooms.has(roomId) && rooms.size >= MAX_ACTIVE_ROOMS) {
+            log(`Active room capacity reached (${MAX_ACTIVE_ROOMS})`, 'WARN');
+            safeSend(ws, { type: 'error', message: 'Server room capacity reached. Try again later.' });
             return;
           }
 
@@ -109,13 +208,23 @@ wss.on('connection', (ws, req) => {
             removeClientFromRoom(ws);
           }
 
-          ws.roomId = roomId;
-          ws.peerId = peerId;
-
           if (!rooms.has(roomId)) {
             rooms.set(roomId, new Map());
           }
           const room = rooms.get(roomId);
+
+          // Check peer quota per room
+          if (room.size >= MAX_PEERS_PER_ROOM) {
+            log(`Room ${roomId} is full (${room.size}/${MAX_PEERS_PER_ROOM})`, 'WARN');
+            safeSend(ws, {
+              type: 'error',
+              message: `Room capacity exceeded (maximum ${MAX_PEERS_PER_ROOM} peers)`
+            });
+            return;
+          }
+
+          ws.roomId = roomId;
+          ws.peerId = peerId;
 
           // Get existing peers in this room
           const existingPeers = Array.from(room.keys());
@@ -147,7 +256,11 @@ wss.on('connection', (ws, req) => {
         }
 
         case 'offer': {
-          if (!ws.roomId || !target) return;
+          if (!ws.roomId || !isValidId(target) || !isValidSdp(sdp)) {
+            safeSend(ws, { type: 'error', message: 'Invalid SDP offer format or target' });
+            return;
+          }
+
           const room = rooms.get(ws.roomId);
           if (!room) return;
 
@@ -164,7 +277,11 @@ wss.on('connection', (ws, req) => {
         }
 
         case 'answer': {
-          if (!ws.roomId || !target) return;
+          if (!ws.roomId || !isValidId(target) || !isValidSdp(sdp)) {
+            safeSend(ws, { type: 'error', message: 'Invalid SDP answer format or target' });
+            return;
+          }
+
           const room = rooms.get(ws.roomId);
           if (!room) return;
 
@@ -181,7 +298,10 @@ wss.on('connection', (ws, req) => {
         }
 
         case 'ice-candidate': {
-          if (!ws.roomId || !target) return;
+          if (!ws.roomId || !isValidId(target) || !isValidCandidate(candidate)) {
+            return;
+          }
+
           const room = rooms.get(ws.roomId);
           if (!room) return;
 
@@ -210,7 +330,7 @@ wss.on('connection', (ws, req) => {
           log(`Unhandled message type: ${type}`, 'WARN');
       }
     } catch (err) {
-      console.error('[MESSAGE PARSE ERROR]:', err);
+      console.error('[MESSAGE PROCESSING ERROR]:', err);
     }
   });
 

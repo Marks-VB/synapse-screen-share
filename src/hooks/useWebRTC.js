@@ -322,17 +322,24 @@ export function useWebRTC({
   }, [addChatMessage, drainPendingCandidates, ensurePeerConnection, logDiag, stopTelemetry]);
 
   // Dedicated WebSocket Transport Hook
+  const sendSignalingRef = useRef(null);
+
   const {
     connectionState: signalingState,
     send: sendSignaling,
+    connect: reconnectSignaling,
     disconnect: disconnectSignaling
   } = useSignaling({
     signalingUrl,
     roomId,
     operatorId,
-    onMessage: (msg) => handleSignalingMessage(msg, sendSignaling),
+    onMessage: useCallback((msg) => {
+      handleSignalingMessage(msg, sendSignalingRef.current);
+    }, [handleSignalingMessage]),
     onLog: logDiag
   });
+
+  sendSignalingRef.current = sendSignaling;
 
   // Create and send SDP Offer
   const sendOffer = useCallback(async (targetPeer = remotePeerId) => {
@@ -419,6 +426,7 @@ export function useWebRTC({
     sendOffer,
     closeConnection,
     disconnectSignaling,
+    reconnectSignaling,
     clearLogs,
     logDiag
   };

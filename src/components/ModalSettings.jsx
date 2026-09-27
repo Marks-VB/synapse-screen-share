@@ -60,12 +60,22 @@ export function ModalSettings({
               type="text"
               value={formSignalingUrl}
               onChange={(e) => setFormSignalingUrl(e.target.value)}
-              placeholder="ws://localhost:3000 or wss://your-worker.workers.dev"
+              placeholder="ws://localhost:3000 ou wss://seu-servidor.onrender.com"
               className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-cyan rounded-lg px-3 py-2 text-cyber-cyan-bright outline-none transition-colors duration-150 ease-out-quick"
               required
             />
-            <p className="text-[10px] text-slate-500 mt-1">
-              For Cloudflare Pages, connect to your WebSocket signaling server or local instance.
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[10px] text-slate-500 uppercase font-semibold">PRESETS:</span>
+              <button
+                type="button"
+                onClick={() => setFormSignalingUrl('ws://localhost:3000')}
+                className="text-[10px] px-2 py-0.5 rounded bg-cyber-card hover:bg-cyber-cyan/20 border border-cyber-border hover:border-cyber-cyan/40 text-cyber-cyan transition-colors"
+              >
+                Localhost (ws://localhost:3000)
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+              O Cloudflare Pages hospeda o frontend PWA. O servidor WebRTC de sinalização (<code className="text-slate-400">server.js</code>) roda localmente via <code className="text-cyber-cyan">npm run server</code> ou pode ser hospedado no Render / Fly.io / Railway.
             </p>
           </div>
 

@@ -232,8 +232,13 @@ export function WelcomeModal({
                 </ol>
               </div>
 
-              <div className="p-2.5 bg-cyan-950/20 border border-cyber-cyan/30 rounded-lg text-[10px] text-slate-400">
-                💡 <strong>Dica Pro:</strong> Você pode instalar o Synapse como aplicativo no seu computador ou celular clicando no ícone de instalação do navegador!
+              <div className="p-2.5 bg-cyan-950/20 border border-cyber-cyan/30 rounded-lg text-[10px] text-slate-300 space-y-1">
+                <p>
+                  🌐 <strong>Rede de Sinalização WebSockets:</strong> O WebRTC necessita de um servidor para trocar o handshake inicial (SDP/ICE). Ao rodar em rede local ou VPS, execute <code className="text-cyber-cyan font-bold">npm run server</code>. Você pode alterar a URL de sinalização a qualquer momento no ícone de ⚙️ Configurações.
+                </p>
+                <p className="text-slate-400">
+                  💡 <strong>Instalação PWA:</strong> Você também pode instalar o Synapse como app desktop/mobile diretamente pelo navegador!
+                </p>
               </div>
             </div>
           )}

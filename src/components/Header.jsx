@@ -57,6 +57,26 @@ export function Header({
   };
 
   const isConnected = connectionState === 'connected';
+  const isError = connectionState === 'error' || connectionState === 'failed';
+  const isReconnecting = connectionState === 'reconnecting' || connectionState === 'connecting';
+
+  let statusLabel = 'STANDBY';
+  let statusColor = 'text-cyber-amber';
+  let dotColor = 'bg-cyber-amber shadow-glow-amber';
+
+  if (isConnected) {
+    statusLabel = 'LINK_ACTIVE';
+    statusColor = 'text-cyber-green';
+    dotColor = 'bg-cyber-green animate-glow-pulse-green';
+  } else if (isReconnecting) {
+    statusLabel = 'CONNECTING...';
+    statusColor = 'text-cyber-cyan';
+    dotColor = 'bg-cyber-cyan animate-pulse';
+  } else if (isError) {
+    statusLabel = 'UPLINK_OFFLINE';
+    statusColor = 'text-red-400';
+    dotColor = 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)] animate-pulse';
+  }
 
   return (
     <header className="h-14 bg-cyber-dark/95 border-b border-cyber-border px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
@@ -71,7 +91,7 @@ export function Header({
               SYNAPSE // PROTOCOL
             </span>
             <span className="text-[10px] text-slate-400 font-mono tracking-widest mt-0.5">
-              V1.0.4 CLOUDFLARE
+              V1.1.0 P2P
             </span>
           </div>
         </div>
@@ -79,22 +99,17 @@ export function Header({
         {/* Ticker / Telemetry Bar */}
         <div className="hidden lg:flex items-center text-xs text-slate-400 font-mono pl-4 border-l border-cyber-border">
           <span className="text-slate-600 mr-2">────</span>
-          <span className="flex items-center gap-1.5">
-            <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ease-out-quick ${
-                isConnected
-                  ? 'bg-cyber-green animate-glow-pulse-green'
-                  : 'bg-cyber-amber shadow-glow-amber'
-              }`}
-            />
-            <span
-              className={`font-bold tracking-wider transition-colors duration-200 ${
-                isConnected ? 'text-cyber-green' : 'text-cyber-amber'
-              }`}
-            >
-              {isConnected ? 'LINK_ACTIVE' : 'STANDBY'}
+          <button
+            type="button"
+            onClick={isError ? onOpenSettings : undefined}
+            className={`flex items-center gap-1.5 ${isError ? 'cursor-pointer hover:opacity-85' : 'cursor-default'}`}
+            title={isError ? 'Servidor de sinalização inacessível. Clique para abrir configurações.' : undefined}
+          >
+            <span className={`w-2 h-2 rounded-full transition-all duration-300 ease-out-quick ${dotColor}`} />
+            <span className={`font-bold tracking-wider transition-colors duration-200 ${statusColor}`}>
+              {statusLabel}
             </span>
-          </span>
+          </button>
           <span className="text-slate-600 mx-2">────</span>
           <span className="text-slate-400 font-mono">
             [NET: <span className="text-cyber-cyan font-bold">{rttMs !== null ? `${rttMs}ms` : '--'}</span>]

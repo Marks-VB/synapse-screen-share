@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useMediaStream } from './hooks/useMediaStream';
 import { useWebRTC } from './hooks/useWebRTC';
 import { Header } from './components/Header';
@@ -47,6 +47,8 @@ export function App() {
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => !localStorage.getItem('synapse_onboarded'));
   const [isBooting, setIsBooting] = useState(true);
 
+  const logDiagRef = useRef(null);
+
   // Update browser URL query param when room changes
   useEffect(() => {
     const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
@@ -73,7 +75,7 @@ export function App() {
       // When screen sharing stops from OS browser prompt
     },
     onLog: (msg, level) => {
-      logDiag(msg, level);
+      if (logDiagRef.current) logDiagRef.current(msg, level);
     }
   });
 
@@ -102,6 +104,8 @@ export function App() {
       // Remote stream arrived
     }
   });
+
+  logDiagRef.current = logDiag;
 
   // Start / Stop Screen Share action
   const handleToggleScreenShare = async () => {
@@ -179,6 +183,24 @@ export function App() {
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
+
+      {/* Offline Signaling Warning Banner */}
+      {(connectionState === 'error' || connectionState === 'failed') && (
+        <div className="bg-red-950/80 border-b border-red-500/40 text-red-200 px-4 py-2 flex items-center justify-between text-xs font-mono shrink-0 backdrop-blur-md">
+          <div className="flex items-center gap-2 overflow-hidden text-ellipsis">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+            <span className="truncate">
+              <strong className="text-red-300">UPLINK OFFLINE:</strong> Servidor de sinalização ({signalingUrl}) não alcançado. Inicie o backend localmente (<code className="text-red-100 bg-red-900/60 px-1 py-0.5 rounded">npm run server</code>) ou altere a URL.
+            </span>
+          </div>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="px-2.5 py-1 rounded bg-red-900/70 hover:bg-red-800 border border-red-500/50 text-red-100 text-[10px] font-bold uppercase transition-colors shrink-0 ml-3"
+          >
+            Configurar URL
+          </button>
+        </div>
+      )}
 
       {/* Main Workspace Body */}
       <div className="flex-1 flex overflow-hidden relative">

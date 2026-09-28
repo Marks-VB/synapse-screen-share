@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight, HelpCircle } from 'lucide-react';
-
-const RANDOM_NAMES = [
-  'CYBER_NODE', 'VALKYRIE_99', 'MATRIX_P2P', 'GHOST_LINK',
-  'NEO_TOKYO', 'SHADOW_RUN', 'SYNAPSE_42', 'DEEP_GRID',
-  'NETRUNNER', 'ZERO_COOL', 'QUANTUM_RAY', 'CHROME_LINK'
-];
+import React, { useState, useEffect, useRef } from 'react';
+import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight, HelpCircle, Lock, Unlock, KeyRound, Copy } from 'lucide-react';
+import { generateSecureRoomId } from '../utils/security';
 
 export function Header({
   roomId,
   onChangeRoom,
+  roomPassword = '',
+  onOpenPasswordModal,
   connectionState,
   rttMs,
   onOpenSettings,
@@ -18,18 +15,58 @@ export function Header({
   onToggleSidebar
 }) {
   const [copied, setCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState('');
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const [inputRoom, setInputRoom] = useState(roomId);
+  const shareMenuRef = useRef(null);
 
   useEffect(() => {
     setInputRoom(roomId);
   }, [roomId]);
 
-  const handleCopyLink = () => {
-    const currentUrl = window.location.href;
-    navigator.clipboard.writeText(currentUrl).then(() => {
+  // Close share menu on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target)) {
+        setShowShareMenu(false);
+      }
+    }
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showShareMenu]);
+
+  const handleCopyCleanLink = () => {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    const url = `${origin}${pathname}?room=${encodeURIComponent(roomId)}`;
+    navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
+      setCopiedType('clean');
+      setShowShareMenu(false);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleCopyDirectKeyLink = () => {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    const url = `${origin}${pathname}?room=${encodeURIComponent(roomId)}#key=${encodeURIComponent(roomPassword)}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setCopiedType('direct');
+      setShowShareMenu(false);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleShareClick = () => {
+    if (roomPassword) {
+      setShowShareMenu((prev) => !prev);
+    } else {
+      handleCopyCleanLink();
+    }
   };
 
   const handleApplyRoom = (e) => {
@@ -42,16 +79,7 @@ export function Header({
   };
 
   const handleRandomRoom = () => {
-    const randomPrefix = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
-    let suffix = '00';
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-      const array = new Uint8Array(2);
-      window.crypto.getRandomValues(array);
-      suffix = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-    } else {
-      suffix = Math.floor(10 + Math.random() * 90).toString();
-    }
-    const newRoom = `${randomPrefix}_${suffix}`;
+    const newRoom = generateSecureRoomId('SYN');
     setInputRoom(newRoom);
     onChangeRoom(newRoom);
   };
@@ -123,51 +151,119 @@ export function Header({
             value={inputRoom}
             onChange={(e) => setInputRoom(e.target.value.toUpperCase())}
             placeholder="NOME_DA_SALA"
-            className="bg-transparent text-cyber-cyan font-bold font-mono text-xs uppercase tracking-wider outline-none w-24 sm:w-28 placeholder:text-slate-600"
-            title="Digite o nome da sala e pressione Enter ou clique na seta"
+            className="bg-transparent text-cyber-cyan font-bold font-mono text-xs uppercase tracking-wider outline-none w-28 sm:w-32 placeholder:text-slate-600"
+            title="Digite o código da sala e pressione Enter"
           />
           {inputRoom !== roomId && (
             <button
               type="submit"
-              className="p-1 rounded bg-cyber-cyan/20 hover:bg-cyber-cyan/30 text-cyber-cyan transition-colors ml-1"
+              className="p-1 rounded bg-cyber-cyan/20 hover:bg-cyber-cyan/30 text-cyber-cyan transition-colors ml-0.5"
               title="Entrar nesta sala"
             >
               <ArrowRight className="w-3 h-3" />
             </button>
           )}
+
+          {/* Random Unique Room Button */}
           <button
             type="button"
             onClick={handleRandomRoom}
-            className="p-1 rounded text-slate-400 hover:text-cyber-cyan hover:bg-slate-800 transition-colors ml-1"
-            title="Gerar nome de sala aleatório"
+            className="p-1 rounded text-slate-400 hover:text-cyber-cyan hover:bg-slate-800 transition-colors ml-0.5"
+            title="Gerar sala única e segura (Sem colisão)"
           >
             <Dices className="w-3.5 h-3.5" />
           </button>
+
+          {/* Room Password Lock Button */}
+          <button
+            type="button"
+            onClick={onOpenPasswordModal}
+            className={`p-1 rounded transition-colors ml-0.5 ${
+              roomPassword
+                ? 'text-cyber-green bg-emerald-950/40 border border-cyber-green/40 hover:bg-emerald-900/60 shadow-glow-green-sm'
+                : 'text-slate-400 hover:text-cyber-cyan hover:bg-slate-800'
+            }`}
+            title={roomPassword ? 'Sala protegida por senha. Clique para gerenciar senha.' : 'Sala aberta (sem senha). Clique para adicionar senha.'}
+          >
+            {roomPassword ? (
+              <Lock className="w-3.5 h-3.5" />
+            ) : (
+              <Unlock className="w-3.5 h-3.5" />
+            )}
+          </button>
         </form>
 
-        {/* Copy Shareable Link */}
-        <button
-          onClick={handleCopyLink}
-          aria-label={copied ? 'Link de compartilhamento copiado' : 'Copiar link de compartilhamento da sala'}
-          className="flex items-center gap-1.5 bg-cyber-cyan/10 hover:bg-cyber-cyan/20 active:scale-[0.97] border border-cyber-cyan/40 text-cyber-cyan-bright px-2.5 sm:px-3 py-1.5 rounded text-xs transition-transform transition-colors duration-150 ease-out-quick shadow-glow-cyan-sm"
-          title="Copiar link direto para esta sala"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-cyber-green" aria-hidden="true" />
-              <span className="font-semibold uppercase tracking-wider text-[11px] text-cyber-green hidden sm:inline">
-                LINK COPIADO!
-              </span>
-            </>
-          ) : (
-            <>
-              <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
-              <span className="font-semibold uppercase tracking-wider text-[11px] hidden sm:inline">
-                COMPARTILHAR LINK
-              </span>
-            </>
+        {/* Copy Shareable Link Dropdown / Button */}
+        <div className="relative" ref={shareMenuRef}>
+          <button
+            onClick={handleShareClick}
+            aria-label={copied ? 'Link copiado' : 'Compartilhar link da sala'}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded text-xs transition-transform transition-colors duration-150 ease-out-quick shadow-glow-cyan-sm active:scale-[0.97] border ${
+              roomPassword
+                ? 'bg-emerald-950/30 border-cyber-green/40 text-cyber-green hover:bg-emerald-900/40'
+                : 'bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border-cyber-cyan/40 text-cyber-cyan-bright'
+            }`}
+            title={roomPassword ? 'Compartilhar link protegido por senha' : 'Copiar link direto para esta sala'}
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-cyber-green" aria-hidden="true" />
+                <span className="font-semibold uppercase tracking-wider text-[11px] text-cyber-green hidden sm:inline">
+                  {copiedType === 'direct' ? 'LINK COM SENHA COPIADO!' : 'LINK COPIADO!'}
+                </span>
+              </>
+            ) : (
+              <>
+                <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span className="font-semibold uppercase tracking-wider text-[11px] hidden sm:inline">
+                  COMPARTILHAR LINK
+                </span>
+                {roomPassword && <Lock className="w-3 h-3 ml-0.5 text-cyber-green" />}
+              </>
+            )}
+          </button>
+
+          {/* Password Sharing Popover Menu */}
+          {showShareMenu && roomPassword && (
+            <div className="absolute right-0 mt-2 w-64 bg-cyber-dark border border-cyber-green/40 rounded-xl shadow-glow-green-lg p-2.5 z-50 animate-modal-enter space-y-2 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-cyber-border/60 pb-1.5 px-1">
+                <span className="text-[10px] uppercase font-bold text-cyber-green flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  <span>SALA PROTEGIDA</span>
+                </span>
+                <span className="text-[10px] text-slate-400">Opções de Link</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyDirectKeyLink}
+                className="w-full text-left p-2 rounded-lg bg-cyber-black hover:bg-emerald-950/40 border border-cyber-border hover:border-cyber-green/50 transition-colors flex items-start gap-2"
+              >
+                <KeyRound className="w-4 h-4 text-cyber-green shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-[11px] font-bold text-slate-100">Copiar Link Direto</div>
+                  <div className="text-[10px] text-slate-400 leading-tight">
+                    Inclui a chave (#key=...) para quem receber entrar direto.
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyCleanLink}
+                className="w-full text-left p-2 rounded-lg bg-cyber-black hover:bg-slate-800 border border-cyber-border hover:border-slate-500 transition-colors flex items-start gap-2"
+              >
+                <Lock className="w-4 h-4 text-cyber-cyan shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-[11px] font-bold text-slate-100">Copiar Link Protegido</div>
+                  <div className="text-[10px] text-slate-400 leading-tight">
+                    O convidado precisará digitar a senha ao entrar.
+                  </div>
+                </div>
+              </button>
+            </div>
           )}
-        </button>
+        </div>
 
         {/* Help & Privacy Modal Button */}
         <button
@@ -184,7 +280,7 @@ export function Header({
           onClick={onOpenSettings}
           aria-label="Abrir configurações de nó e rede"
           className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
-          title="Configurações (Servidor, Sala, Usuário)"
+          title="Configurações (Servidor, Sala, Senha, Usuário)"
         >
           <Settings className="w-4 h-4" aria-hidden="true" />
         </button>

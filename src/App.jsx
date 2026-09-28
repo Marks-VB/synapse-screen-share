@@ -6,15 +6,36 @@ import { StageViewer } from './components/StageViewer';
 import { QuantumDock } from './components/QuantumDock';
 import { TerminalChat } from './components/TerminalChat';
 import { ModalSettings } from './components/ModalSettings';
+import { PasswordPromptModal } from './components/PasswordPromptModal';
 import { Footer } from './components/Footer';
 import { WelcomeModal } from './components/WelcomeModal';
 import { LoadingScreen } from './components/LoadingScreen';
-import { sanitizeIdentifier, generateSecureId, isValidSignalingUrl } from './utils/security';
+import {
+  sanitizeIdentifier,
+  generateSecureId,
+  generateSecureRoomId,
+  hashPassword,
+  isValidSignalingUrl
+} from './utils/security';
 
 function getInitialRoom() {
   const params = new URLSearchParams(window.location.search);
   const r = params.get('room');
-  return sanitizeIdentifier(r, 'NODE_ALPHA');
+  if (r) {
+    return sanitizeIdentifier(r, '');
+  }
+  return generateSecureRoomId('SYN');
+}
+
+function getInitialPassword() {
+  if (window.location.hash) {
+    const hash = window.location.hash.slice(1);
+    const hashParams = new URLSearchParams(hash);
+    const key = hashParams.get('key') || hashParams.get('pwd');
+    if (key) return key;
+  }
+  const params = new URLSearchParams(window.location.search);
+  return params.get('key') || params.get('pwd') || '';
 }
 
 function getInitialSignalingUrl() {
@@ -40,6 +61,12 @@ function getInitialOperator() {
 
 export function App() {
   const [roomId, setRoomId] = useState(getInitialRoom);
+  const [roomPassword, setRoomPassword] = useState(getInitialPassword);
+  const [passwordHash, setPasswordHash] = useState('');
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordModalMode, setPasswordModalMode] = useState('configure');
+  const [passwordError, setPasswordError] = useState('');
+
   const [signalingUrl, setSignalingUrl] = useState(getInitialSignalingUrl);
   const [operatorId, setOperatorId] = useState(getInitialOperator);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -49,11 +76,29 @@ export function App() {
 
   const logDiagRef = useRef(null);
 
-  // Update browser URL query param when room changes
+  // Compute password hash for room authentication
   useEffect(() => {
-    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
+    let isMounted = true;
+    if (roomPassword) {
+      hashPassword(roomPassword, roomId).then((h) => {
+        if (isMounted) setPasswordHash(h);
+      });
+    } else {
+      setPasswordHash('');
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [roomPassword, roomId]);
+
+  // Update browser URL query and hash params when room or password changes
+  useEffect(() => {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    const hashPart = roomPassword ? `#key=${encodeURIComponent(roomPassword)}` : '';
+    const newUrl = `${origin}${pathname}?room=${encodeURIComponent(roomId)}${hashPart}`;
     window.history.replaceState({ path: newUrl }, '', newUrl);
-  }, [roomId]);
+  }, [roomId, roomPassword]);
 
   // Media Stream Hook
   const {
@@ -98,10 +143,16 @@ export function App() {
     signalingUrl,
     roomId,
     operatorId,
+    passwordHash,
     isScreenSharing,
     activeQuality,
     onRemoteStreamReceived: () => {
       // Remote stream arrived
+    },
+    onAuthRequired: (message) => {
+      setPasswordError(message || 'Esta sala requer uma senha de acesso.');
+      setPasswordModalMode('prompt');
+      setIsPasswordModalOpen(true);
     }
   });
 
@@ -157,7 +208,7 @@ export function App() {
   };
 
   // Settings Save
-  const handleSaveSettings = ({ signalingUrl: newUrl, roomId: newRoom, operatorId: newOp }) => {
+  const handleSaveSettings = ({ signalingUrl: newUrl, roomId: newRoom, operatorId: newOp, roomPassword: newPwd }) => {
     const cleanUrl = isValidSignalingUrl(newUrl) ? newUrl.trim() : signalingUrl;
     const cleanRoom = sanitizeIdentifier(newRoom, roomId);
     const cleanOp = sanitizeIdentifier(newOp, operatorId);
@@ -165,8 +216,18 @@ export function App() {
     setSignalingUrl(cleanUrl);
     setRoomId(cleanRoom);
     setOperatorId(cleanOp);
+    setRoomPassword(typeof newPwd === 'string' ? newPwd.trim() : roomPassword);
+
     localStorage.setItem('synapse_signaling_url', cleanUrl);
     localStorage.setItem('synapse_operator_id', cleanOp);
+    handleTerminate();
+  };
+
+  // Password Prompt / Configure Submit
+  const handlePasswordSubmit = (submittedPwd) => {
+    setRoomPassword(submittedPwd);
+    setPasswordError('');
+    setIsPasswordModalOpen(false);
     handleTerminate();
   };
 
@@ -176,6 +237,12 @@ export function App() {
       <Header
         roomId={roomId}
         onChangeRoom={handleChangeRoom}
+        roomPassword={roomPassword}
+        onOpenPasswordModal={() => {
+          setPasswordError('');
+          setPasswordModalMode('configure');
+          setIsPasswordModalOpen(true);
+        }}
         connectionState={connectionState}
         rttMs={metrics.rttMs}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -232,7 +299,19 @@ export function App() {
         signalingUrl={signalingUrl}
         roomId={roomId}
         operatorId={operatorId}
+        roomPassword={roomPassword}
         onSave={handleSaveSettings}
+      />
+
+      {/* Password Prompt & Configuration Modal */}
+      <PasswordPromptModal
+        isOpen={isPasswordModalOpen}
+        mode={passwordModalMode}
+        currentPassword={roomPassword}
+        roomId={roomId}
+        errorMessage={passwordError}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onSubmit={handlePasswordSubmit}
       />
 
       {/* Welcome & Localhost Onboarding Modal */}

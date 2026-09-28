@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Network, Server, Hash, ShieldCheck, Check } from 'lucide-react';
+import { X, Network, Server, Hash, ShieldCheck, Check, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { generateSecurePin } from '../utils/security';
 
 export function ModalSettings({
   isOpen,
@@ -7,24 +8,35 @@ export function ModalSettings({
   signalingUrl,
   roomId,
   operatorId,
+  roomPassword = '',
   onSave
 }) {
   const [formSignalingUrl, setFormSignalingUrl] = useState(signalingUrl);
   const [formRoomId, setFormRoomId] = useState(roomId);
   const [formOperatorId, setFormOperatorId] = useState(operatorId);
+  const [formPassword, setFormPassword] = useState(roomPassword);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleGeneratePin = () => {
+    const pin = generateSecurePin(6);
+    setFormPassword(pin);
+    setShowPassword(true);
+  };
 
   const handleSave = (e) => {
     e.preventDefault();
     const cleanRoom = formRoomId.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
     const cleanOperator = formOperatorId.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase().slice(0, 32);
     const cleanUrl = formSignalingUrl.trim();
+    const cleanPassword = formPassword.trim();
 
     onSave({
       signalingUrl: cleanUrl,
       roomId: cleanRoom || roomId,
-      operatorId: cleanOperator || operatorId
+      operatorId: cleanOperator || operatorId,
+      roomPassword: cleanPassword
     });
     onClose();
   };
@@ -93,6 +105,45 @@ export function ModalSettings({
               className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-purple rounded-lg px-3 py-2 text-cyber-purple-light uppercase outline-none transition-colors duration-150 ease-out-quick"
               required
             />
+          </div>
+
+          {/* Room Password (Optional) */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="flex items-center gap-1.5 text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
+                <Lock className="w-3.5 h-3.5 text-cyber-green" />
+                <span>SENHA DA SALA (OPCIONAL)</span>
+              </label>
+              <button
+                type="button"
+                onClick={handleGeneratePin}
+                className="text-[10px] text-cyber-cyan hover:underline flex items-center gap-1"
+                title="Gerar PIN de 6 dígitos aleatório"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>GERAR PIN</span>
+              </button>
+            </div>
+            <div className="relative flex items-center">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={formPassword}
+                onChange={(e) => setFormPassword(e.target.value)}
+                placeholder="Deixe em branco para sala aberta pública"
+                className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-green rounded-lg px-3 py-2 pr-10 text-cyber-green font-mono tracking-wider outline-none transition-colors duration-150 ease-out-quick"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-2.5 p-1 text-slate-400 hover:text-cyber-green transition-colors"
+                title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1">
+              {formPassword ? '🔒 Apenas participantes com esta senha poderão conectar nesta sala.' : '🔓 Sala aberta: qualquer pessoa com o link pode conectar.'}
+            </p>
           </div>
 
           {/* Operator Callsign */}

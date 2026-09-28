@@ -60,7 +60,7 @@ const wss = new WebSocketServer({
   maxPayload: MAX_PAYLOAD_BYTES
 });
 
-// Map<roomId, Map<peerId, { ws: WebSocket, peerId: string, joinedAt: number }>>
+// Map<roomId, { clients: Map<peerId, { ws: WebSocket, peerId: string, joinedAt: number }>, passwordHash: string | null }>
 const rooms = new Map();
 
 // Input Validation Helpers
@@ -105,19 +105,19 @@ function removeClientFromRoom(ws) {
   if (!roomId || !peerId) return;
 
   const room = rooms.get(roomId);
-  if (room) {
-    room.delete(peerId);
+  if (room && room.clients) {
+    room.clients.delete(peerId);
     log(`Peer \x1b[33m${peerId}\x1b[0m disconnected from room \x1b[32m${roomId}\x1b[0m`, 'CORE');
 
     // Notify remaining peers
-    for (const [otherPeerId, client] of room.entries()) {
+    for (const [otherPeerId, client] of room.clients.entries()) {
       safeSend(client.ws, {
         type: 'peer-disconnected',
         peerId
       });
     }
 
-    if (room.size === 0) {
+    if (room.clients.size === 0) {
       rooms.delete(roomId);
       log(`Room \x1b[32m${roomId}\x1b[0m purged (0 peers remaining)`, 'PURGE');
     }
@@ -178,7 +178,7 @@ wss.on('connection', (ws, req) => {
         return;
       }
 
-      const { type, roomId, peerId, target, sdp, candidate } = message;
+      const { type, roomId, peerId, target, sdp, candidate, passwordHash } = message;
 
       if (!ALLOWED_MESSAGE_TYPES.has(type)) {
         log(`Rejected unauthorized message type: ${type}`, 'SECURITY');
@@ -209,13 +209,33 @@ wss.on('connection', (ws, req) => {
           }
 
           if (!rooms.has(roomId)) {
-            rooms.set(roomId, new Map());
+            rooms.set(roomId, {
+              clients: new Map(),
+              passwordHash: typeof passwordHash === 'string' && passwordHash.trim() ? passwordHash.trim() : null
+            });
           }
+
           const room = rooms.get(roomId);
 
+          // Room Password Verification
+          if (room.passwordHash) {
+            if (!passwordHash || passwordHash !== room.passwordHash) {
+              log(`Peer \x1b[33${peerId}\x1b[0m failed password authentication for room \x1b[32m${roomId}\x1b[0m`, 'SECURITY');
+              safeSend(ws, {
+                type: 'auth-required',
+                roomId,
+                message: 'Este nó requer uma senha de acesso válida.'
+              });
+              return;
+            }
+          } else if (passwordHash && room.clients.size === 0) {
+            // First peer sets the room password
+            room.passwordHash = passwordHash;
+          }
+
           // Check peer quota per room
-          if (room.size >= MAX_PEERS_PER_ROOM) {
-            log(`Room ${roomId} is full (${room.size}/${MAX_PEERS_PER_ROOM})`, 'WARN');
+          if (room.clients.size >= MAX_PEERS_PER_ROOM) {
+            log(`Room ${roomId} is full (${room.clients.size}/${MAX_PEERS_PER_ROOM})`, 'WARN');
             safeSend(ws, {
               type: 'error',
               message: `Room capacity exceeded (maximum ${MAX_PEERS_PER_ROOM} peers)`
@@ -227,24 +247,25 @@ wss.on('connection', (ws, req) => {
           ws.peerId = peerId;
 
           // Get existing peers in this room
-          const existingPeers = Array.from(room.keys());
+          const existingPeers = Array.from(room.clients.keys());
 
           // Register this client
-          room.set(peerId, { ws, peerId, joinedAt: Date.now() });
+          room.clients.set(peerId, { ws, peerId, joinedAt: Date.now() });
 
-          log(`Peer \x1b[33m${peerId}\x1b[0m joined room \x1b[32m${roomId}\x1b[0m (Total: ${room.size})`, 'ROOM');
+          log(`Peer \x1b[33m${peerId}\x1b[0m joined room \x1b[32m${roomId}\x1b[0m (Total: ${room.clients.size})`, 'ROOM');
 
           // Send confirmation with existing peers
           safeSend(ws, {
             type: 'room-joined',
             roomId,
             peerId,
+            isProtected: !!room.passwordHash,
             peers: existingPeers
           });
 
           // Notify existing peers about this new peer
           for (const otherPeerId of existingPeers) {
-            const peerClient = room.get(otherPeerId);
+            const peerClient = room.clients.get(otherPeerId);
             if (peerClient) {
               safeSend(peerClient.ws, {
                 type: 'peer-joined',
@@ -262,9 +283,9 @@ wss.on('connection', (ws, req) => {
           }
 
           const room = rooms.get(ws.roomId);
-          if (!room) return;
+          if (!room || !room.clients) return;
 
-          const targetClient = room.get(target);
+          const targetClient = room.clients.get(target);
           if (targetClient) {
             log(`Relaying SDP offer: \x1b[33m${ws.peerId}\x1b[0m -> \x1b[33m${target}\x1b[0m`, 'SIGNAL');
             safeSend(targetClient.ws, {
@@ -283,9 +304,9 @@ wss.on('connection', (ws, req) => {
           }
 
           const room = rooms.get(ws.roomId);
-          if (!room) return;
+          if (!room || !room.clients) return;
 
-          const targetClient = room.get(target);
+          const targetClient = room.clients.get(target);
           if (targetClient) {
             log(`Relaying SDP answer: \x1b[33m${ws.peerId}\x1b[0m -> \x1b[33m${target}\x1b[0m`, 'SIGNAL');
             safeSend(targetClient.ws, {
@@ -303,9 +324,9 @@ wss.on('connection', (ws, req) => {
           }
 
           const room = rooms.get(ws.roomId);
-          if (!room) return;
+          if (!room || !room.clients) return;
 
-          const targetClient = room.get(target);
+          const targetClient = room.clients.get(target);
           if (targetClient) {
             safeSend(targetClient.ws, {
               type: 'ice-candidate',

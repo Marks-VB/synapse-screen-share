@@ -11,10 +11,15 @@ export function useWebRTC({
   signalingUrl,
   roomId,
   operatorId,
+  passwordHash,
   isScreenSharing,
   activeQuality,
-  onRemoteStreamReceived
+  onRemoteStreamReceived,
+  onAuthRequired
 }) {
+  const onAuthRequiredRef = useRef(onAuthRequired);
+  onAuthRequiredRef.current = onAuthRequired;
+
   const [webrtcState, setWebrtcState] = useState('idle');
   const [iceState, setIceState] = useState('new');
   const [remoteStream, setRemoteStream] = useState(null);
@@ -241,10 +246,19 @@ export function useWebRTC({
   const handleSignalingMessage = useCallback(async (msg, sendSignalingFn) => {
     switch (msg.type) {
       case 'room-joined': {
-        logDiag(`Uplink established in Node [${msg.roomId}]. Peers: ${msg.peers.length}`, 'SUCCESS');
+        logDiag(`Uplink established in Node [${msg.roomId}]. Peers: ${msg.peers.length}${msg.isProtected ? ' [PROTEGIDO]' : ''}`, 'SUCCESS');
         if (msg.peers.length > 0) {
           setRemotePeerId(msg.peers[0]);
           logDiag(`Target peer identified: ${msg.peers[0]}`, 'INFO');
+        }
+        break;
+      }
+      case 'auth-required':
+      case 'auth-error': {
+        logDiag(`[SEGURANÇA] ${msg.message || 'Autenticação necessária para este nó.'}`, 'WARN');
+        addChatMessage('SYSTEM', `ACESSO RESTRITO: ${msg.message || 'Esta sala requer senha de acesso.'}`, true);
+        if (onAuthRequiredRef.current) {
+          onAuthRequiredRef.current(msg.message || 'Senha necessária');
         }
         break;
       }
@@ -333,6 +347,7 @@ export function useWebRTC({
     signalingUrl,
     roomId,
     operatorId,
+    passwordHash,
     onMessage: useCallback((msg) => {
       handleSignalingMessage(msg, sendSignalingRef.current);
     }, [handleSignalingMessage]),

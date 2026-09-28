@@ -10,6 +10,7 @@ export function useSignaling({
   signalingUrl,
   roomId,
   operatorId,
+  passwordHash,
   onMessage,
   onLog
 }) {
@@ -83,7 +84,8 @@ export function useSignaling({
         send({
           type: 'join-room',
           roomId,
-          peerId: operatorId
+          peerId: operatorId,
+          passwordHash: passwordHash || null
         });
       };
 
@@ -136,7 +138,7 @@ export function useSignaling({
       setConnectionState('standby');
       log(`[SIGNALING] Inicialização em modo de espera: ${err.message}`, 'INFO');
     }
-  }, [signalingUrl, roomId, operatorId, send, log]);
+  }, [signalingUrl, roomId, operatorId, passwordHash, send, log]);
 
   // Connect cleanly on demand
   const connect = useCallback(() => {

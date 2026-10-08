@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight, HelpCircle, Lock, Unlock, KeyRound, Copy } from 'lucide-react';
-import { generateSecureRoomId } from '../utils/security';
+import { generateSecureRoomId, copyToClipboard } from '../utils/security';
+import { useI18n } from '../i18n/I18nContext';
 
 export function Header({
   roomId,
@@ -14,6 +15,7 @@ export function Header({
   isSidebarOpen,
   onToggleSidebar
 }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const [copiedType, setCopiedType] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -37,28 +39,30 @@ export function Header({
     }
   }, [showShareMenu]);
 
-  const handleCopyCleanLink = () => {
+  const handleCopyCleanLink = async () => {
     const origin = window.location.origin;
     const pathname = window.location.pathname;
     const url = `${origin}${pathname}?room=${encodeURIComponent(roomId)}`;
-    navigator.clipboard.writeText(url).then(() => {
+    const success = await copyToClipboard(url);
+    if (success) {
       setCopied(true);
       setCopiedType('clean');
       setShowShareMenu(false);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }
   };
 
-  const handleCopyDirectKeyLink = () => {
+  const handleCopyDirectKeyLink = async () => {
     const origin = window.location.origin;
     const pathname = window.location.pathname;
     const url = `${origin}${pathname}?room=${encodeURIComponent(roomId)}#key=${encodeURIComponent(roomPassword)}`;
-    navigator.clipboard.writeText(url).then(() => {
+    const success = await copyToClipboard(url);
+    if (success) {
       setCopied(true);
       setCopiedType('direct');
       setShowShareMenu(false);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }
   };
 
   const handleShareClick = () => {
@@ -87,16 +91,16 @@ export function Header({
   const isConnected = connectionState === 'connected';
   const isReconnecting = connectionState === 'reconnecting' || connectionState === 'connecting';
 
-  let statusLabel = 'STANDBY';
+  let statusLabel = t('header.statusStandby');
   let statusColor = 'text-cyber-amber';
   let dotColor = 'bg-cyber-amber shadow-glow-amber';
 
   if (isConnected) {
-    statusLabel = 'LINK_ACTIVE';
+    statusLabel = t('header.statusActive');
     statusColor = 'text-cyber-green';
     dotColor = 'bg-cyber-green animate-glow-pulse-green';
   } else if (isReconnecting) {
-    statusLabel = 'CONNECTING...';
+    statusLabel = t('header.statusConnecting');
     statusColor = 'text-cyber-cyan';
     dotColor = 'bg-cyber-cyan animate-pulse';
   }
@@ -114,7 +118,7 @@ export function Header({
               SYNAPSE // PROTOCOL
             </span>
             <span className="text-[10px] text-slate-400 font-mono tracking-widest mt-0.5">
-              V1.1.0 P2P
+              {t('header.brandSub')}
             </span>
           </div>
         </div>
@@ -134,7 +138,7 @@ export function Header({
           </span>
           <span className="text-slate-600 mx-2">────</span>
           <span className="text-slate-400 font-mono">
-            [ENC: <span className="text-cyber-purple-light font-bold">AES-GCM-256</span>]
+            [ENC: <span className="text-cyber-purple-light font-bold">{t('header.encryption')}</span>]
           </span>
         </div>
       </div>
@@ -144,21 +148,21 @@ export function Header({
         {/* Interactive Room Selector Form */}
         <form onSubmit={handleApplyRoom} className="flex items-center bg-cyber-card border border-cyber-border focus-within:border-cyber-cyan/60 rounded px-2 py-1 text-xs transition-colors">
           <span className="text-slate-400 mr-1.5 uppercase text-[10px] tracking-wider font-semibold">
-            NODE:
+            {t('header.nodeLabel')}
           </span>
           <input
             type="text"
             value={inputRoom}
             onChange={(e) => setInputRoom(e.target.value.toUpperCase())}
-            placeholder="NOME_DA_SALA"
+            placeholder={t('header.roomPlaceholder')}
             className="bg-transparent text-cyber-cyan font-bold font-mono text-xs uppercase tracking-wider outline-none w-28 sm:w-32 placeholder:text-slate-600"
-            title="Digite o código da sala e pressione Enter"
+            title={t('header.enterRoom')}
           />
           {inputRoom !== roomId && (
             <button
               type="submit"
               className="p-1 rounded bg-cyber-cyan/20 hover:bg-cyber-cyan/30 text-cyber-cyan transition-colors ml-0.5"
-              title="Entrar nesta sala"
+              title={t('header.enterRoom')}
             >
               <ArrowRight className="w-3 h-3" />
             </button>
@@ -169,7 +173,7 @@ export function Header({
             type="button"
             onClick={handleRandomRoom}
             className="p-1 rounded text-slate-400 hover:text-cyber-cyan hover:bg-slate-800 transition-colors ml-0.5"
-            title="Gerar sala única e segura (Sem colisão)"
+            title={t('header.randomRoom')}
           >
             <Dices className="w-3.5 h-3.5" />
           </button>
@@ -183,7 +187,7 @@ export function Header({
                 ? 'text-cyber-green bg-emerald-950/40 border border-cyber-green/40 hover:bg-emerald-900/60 shadow-glow-green-sm'
                 : 'text-slate-400 hover:text-cyber-cyan hover:bg-slate-800'
             }`}
-            title={roomPassword ? 'Sala protegida por senha. Clique para gerenciar senha.' : 'Sala aberta (sem senha). Clique para adicionar senha.'}
+            title={roomPassword ? t('header.lockedRoom') : t('header.openRoom')}
           >
             {roomPassword ? (
               <Lock className="w-3.5 h-3.5" />
@@ -197,26 +201,26 @@ export function Header({
         <div className="relative" ref={shareMenuRef}>
           <button
             onClick={handleShareClick}
-            aria-label={copied ? 'Link copiado' : 'Compartilhar link da sala'}
+            aria-label={copied ? t('header.linkCopied') : t('header.shareLink')}
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded text-xs transition-transform transition-colors duration-150 ease-out-quick shadow-glow-cyan-sm active:scale-[0.97] border ${
               roomPassword
                 ? 'bg-emerald-950/30 border-cyber-green/40 text-cyber-green hover:bg-emerald-900/40'
                 : 'bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border-cyber-cyan/40 text-cyber-cyan-bright'
             }`}
-            title={roomPassword ? 'Compartilhar link protegido por senha' : 'Copiar link direto para esta sala'}
+            title={roomPassword ? t('header.protectedRoomTitle') : t('header.shareLink')}
           >
             {copied ? (
               <>
                 <Check className="w-3.5 h-3.5 text-cyber-green" aria-hidden="true" />
                 <span className="font-semibold uppercase tracking-wider text-[11px] text-cyber-green hidden sm:inline">
-                  {copiedType === 'direct' ? 'LINK COM SENHA COPIADO!' : 'LINK COPIADO!'}
+                  {copiedType === 'direct' ? t('header.directLinkCopied') : t('header.linkCopied')}
                 </span>
               </>
             ) : (
               <>
                 <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="font-semibold uppercase tracking-wider text-[11px] hidden sm:inline">
-                  COMPARTILHAR LINK
+                  {t('header.shareLink')}
                 </span>
                 {roomPassword && <Lock className="w-3 h-3 ml-0.5 text-cyber-green" />}
               </>
@@ -229,9 +233,9 @@ export function Header({
               <div className="flex items-center justify-between border-b border-cyber-border/60 pb-1.5 px-1">
                 <span className="text-[10px] uppercase font-bold text-cyber-green flex items-center gap-1">
                   <Lock className="w-3 h-3" />
-                  <span>SALA PROTEGIDA</span>
+                  <span>{t('header.protectedRoomTitle')}</span>
                 </span>
-                <span className="text-[10px] text-slate-400">Opções de Link</span>
+                <span className="text-[10px] text-slate-400">{t('header.linkOptions')}</span>
               </div>
 
               <button
@@ -241,9 +245,9 @@ export function Header({
               >
                 <KeyRound className="w-4 h-4 text-cyber-green shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-[11px] font-bold text-slate-100">Copiar Link Direto</div>
+                  <div className="text-[11px] font-bold text-slate-100">{t('header.directLinkTitle')}</div>
                   <div className="text-[10px] text-slate-400 leading-tight">
-                    Inclui a chave (#key=...) para quem receber entrar direto.
+                    {t('header.directLinkDesc')}
                   </div>
                 </div>
               </button>
@@ -255,9 +259,9 @@ export function Header({
               >
                 <Lock className="w-4 h-4 text-cyber-cyan shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-[11px] font-bold text-slate-100">Copiar Link Protegido</div>
+                  <div className="text-[11px] font-bold text-slate-100">{t('header.cleanLinkTitle')}</div>
                   <div className="text-[10px] text-slate-400 leading-tight">
-                    O convidado precisará digitar a senha ao entrar.
+                    {t('header.cleanLinkDesc')}
                   </div>
                 </div>
               </button>
@@ -268,9 +272,9 @@ export function Header({
         {/* Help & Privacy Modal Button */}
         <button
           onClick={onOpenHelp}
-          aria-label="Abrir guia de introdução, protocolo e privacidade"
+          aria-label={t('header.helpTooltip')}
           className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
-          title="Guia do Operador & Privacidade (Cookies/Local)"
+          title={t('header.helpTooltip')}
         >
           <HelpCircle className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -278,9 +282,9 @@ export function Header({
         {/* Settings Button */}
         <button
           onClick={onOpenSettings}
-          aria-label="Abrir configurações de nó e rede"
+          aria-label={t('header.settingsTooltip')}
           className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
-          title="Configurações (Servidor, Sala, Senha, Usuário)"
+          title={t('header.settingsTooltip')}
         >
           <Settings className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -288,10 +292,10 @@ export function Header({
         {/* Toggle Sidebar */}
         <button
           onClick={onToggleSidebar}
-          aria-label={isSidebarOpen ? 'Fechar barra lateral de mensagens e diagnóstico' : 'Abrir barra lateral de mensagens e diagnóstico'}
+          aria-label={t('header.terminalTooltip')}
           aria-expanded={isSidebarOpen}
           className="p-1.5 rounded bg-cyber-card hover:bg-cyber-card-hover active:scale-[0.96] border border-cyber-border text-slate-300 hover:text-cyber-cyan hover:border-cyber-cyan/40 transition-transform transition-colors duration-150 ease-out-quick"
-          title={isSidebarOpen ? 'Fechar Sidebar' : 'Abrir Sidebar'}
+          title={t('header.terminalTooltip')}
         >
           {isSidebarOpen ? (
             <PanelRightClose className="w-4 h-4" aria-hidden="true" />

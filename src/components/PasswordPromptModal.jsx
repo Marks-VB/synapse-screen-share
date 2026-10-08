@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Lock, Unlock, KeyRound, Eye, EyeOff, ShieldAlert, Check, X, Sparkles, RefreshCw } from 'lucide-react';
 import { generateSecurePin } from '../utils/security';
+import { useI18n } from '../i18n/I18nContext';
 
 export function PasswordPromptModal({
   isOpen,
@@ -11,6 +12,7 @@ export function PasswordPromptModal({
   onClose,
   onSubmit
 }) {
+  const { t } = useI18n();
   const [password, setPassword] = useState(currentPassword);
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState('');
@@ -43,7 +45,7 @@ export function PasswordPromptModal({
     const cleanPwd = password.trim();
 
     if (mode === 'prompt' && !cleanPwd) {
-      setLocalError('Por favor, digite a chave de acesso da sala.');
+      setLocalError(t('auth.errorEmpty'));
       return;
     }
 
@@ -78,8 +80,8 @@ export function PasswordPromptModal({
             )}
             <span id="pwd-modal-title" className="font-headline font-bold text-sm uppercase text-slate-100 tracking-wider">
               {isPromptMode
-                ? 'NÓ PROTEGIDO // AUTENTICAÇÃO'
-                : 'SEGURANÇA DO NÓ // SENHA'}
+                ? t('auth.title')
+                : t('settings.passwordLabel')}
             </span>
           </div>
           <button
@@ -97,7 +99,7 @@ export function PasswordPromptModal({
           <div className="bg-cyber-black/70 border border-cyber-border rounded-xl p-3.5 space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-                CANAL DE COMUNICAÇÃO:
+                {t('settings.nodeLabel')}
               </span>
               <span className="text-cyber-cyan font-bold font-mono tracking-wider">
                 {roomId || 'NODE'}
@@ -105,8 +107,8 @@ export function PasswordPromptModal({
             </div>
             <p className="text-slate-300 text-[11px] leading-relaxed">
               {isPromptMode
-                ? 'Esta sala está protegida por chave de segurança. Digite a senha para estabelecer o uplink P2P.'
-                : 'Defina uma senha opcional para impedir que participantes não autorizados entrem nesta sala.'}
+                ? t('auth.description')
+                : t('settings.passwordLockedDesc')}
             </p>
           </div>
 
@@ -115,17 +117,17 @@ export function PasswordPromptModal({
             <div className="flex items-center justify-between mb-1.5">
               <label htmlFor="room-password-input" className="text-slate-300 font-semibold uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-cyber-cyan" />
-                <span>CHAVE DE ACESSO / SENHA</span>
+                <span>{t('auth.inputLabel')}</span>
               </label>
               {!isPromptMode && (
                 <button
                   type="button"
                   onClick={handleGenerateRandom}
                   className="text-[10px] text-cyber-cyan hover:text-cyber-cyan-bright flex items-center gap-1 hover:underline transition-colors"
-                  title="Gerar PIN seguro de 6 dígitos"
+                  title={t('settings.generatePin')}
                 >
                   <Sparkles className="w-3 h-3" />
-                  <span>GERAR PIN</span>
+                  <span>{t('settings.generatePin')}</span>
                 </button>
               )}
             </div>
@@ -140,7 +142,7 @@ export function PasswordPromptModal({
                   setPassword(e.target.value);
                   setLocalError('');
                 }}
-                placeholder={isPromptMode ? 'Digite a senha da sala...' : 'Digite uma senha ou deixe vazio para sala aberta'}
+                placeholder={isPromptMode ? t('auth.inputPlaceholder') : t('settings.passwordPlaceholder')}
                 maxLength={64}
                 autoComplete="off"
                 className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-cyan rounded-lg px-3 py-2.5 pr-10 text-cyber-cyan font-mono tracking-wider outline-none transition-colors"
@@ -185,14 +187,14 @@ export function PasswordPromptModal({
                 onClick={onClose}
                 className="px-3.5 py-2 rounded-lg bg-cyber-card hover:bg-cyber-card-hover border border-cyber-border text-slate-300 hover:text-white transition-colors text-[11px] font-semibold"
               >
-                CANCELAR
+                {t('auth.cancelBtn')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-cyber-cyan hover:bg-cyber-cyan-bright text-cyber-void font-bold uppercase tracking-wider text-[11px] shadow-glow-cyan-sm flex items-center gap-1.5 transition-all active:scale-[0.97]"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>{isPromptMode ? 'DESBLOQUEAR' : password ? 'SALVAR SENHA' : 'SALVAR SALA'}</span>
+                <span>{isPromptMode ? t('auth.submitBtn') : t('settings.saveBtn')}</span>
               </button>
             </div>
           </div>

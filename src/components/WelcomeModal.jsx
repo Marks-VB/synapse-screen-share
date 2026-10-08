@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, User, Cookie, Tv, Sparkles, ArrowRight, Check, X, Dices } from 'lucide-react';
 import { generateSecureId, sanitizeIdentifier } from '../utils/security';
+import { useI18n } from '../i18n/I18nContext';
 
 export function WelcomeModal({
   isOpen,
@@ -9,6 +10,7 @@ export function WelcomeModal({
   currentRoom,
   onSaveProfile
 }) {
+  const { t } = useI18n();
   const [step, setStep] = useState(1);
   const [operatorName, setOperatorName] = useState(currentOperator || '');
   const [roomName, setRoomName] = useState(currentRoom || 'NODE_ALPHA');
@@ -46,7 +48,7 @@ export function WelcomeModal({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-cyber-cyan" aria-hidden="true" />
             <span id="welcome-modal-title" className="font-headline font-bold text-sm uppercase text-slate-100 tracking-wider">
-              SYNAPSE // PROTOCOLO DE BOAS-VINDAS
+              {t('welcome.title')}
             </span>
           </div>
           <button
@@ -69,7 +71,7 @@ export function WelcomeModal({
             }`}
           >
             <User className="w-3 h-3" />
-            <span>1. Perfil Local</span>
+            <span>{t('welcome.tabProfile')}</span>
           </button>
           <button
             onClick={() => setStep(2)}
@@ -80,7 +82,7 @@ export function WelcomeModal({
             }`}
           >
             <Cookie className="w-3 h-3" />
-            <span>2. Privacidade & Cookies</span>
+            <span>{t('welcome.tabPrivacy')}</span>
           </button>
           <button
             onClick={() => setStep(3)}
@@ -91,7 +93,7 @@ export function WelcomeModal({
             }`}
           >
             <Tv className="w-3 h-3" />
-            <span>3. Como Operar</span>
+            <span>{t('welcome.tabGuide')}</span>
           </button>
         </div>
 
@@ -103,17 +105,17 @@ export function WelcomeModal({
               <div className="bg-cyber-card/80 border border-cyber-cyan/30 rounded-xl p-3.5 space-y-2">
                 <div className="flex items-center gap-2 text-cyber-cyan-bright font-bold text-xs uppercase">
                   <Sparkles className="w-3.5 h-3.5 text-cyber-cyan" />
-                  <span>CADASTRO LOCAL PRIVADO (ZERO NUVEM)</span>
+                  <span>{t('welcome.step1Title')}</span>
                 </div>
                 <p className="text-slate-300 text-[11px] leading-relaxed">
-                  O Synapse não requer conta de e-mail, senha ou cadastro em servidores centrais. Seus dados de identificação ficam guardados <strong>exclusivamente no seu próprio dispositivo (localStorage)</strong>.
+                  {t('welcome.step1Desc')}
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                    CODENAME DO OPERADOR
+                    {t('settings.operatorLabel')}
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -128,17 +130,17 @@ export function WelcomeModal({
                       type="button"
                       onClick={handleRandomize}
                       className="px-3 py-2 bg-cyber-card border border-cyber-border hover:border-cyber-cyan text-slate-300 hover:text-cyber-cyan rounded-lg transition-colors flex items-center gap-1"
-                      title="Gerar Codename Aleatório"
+                      title={t('settings.randomizeBtn')}
                     >
                       <Dices className="w-4 h-4" />
-                      <span className="hidden sm:inline text-[10px]">SORTEAR</span>
+                      <span className="hidden sm:inline text-[10px]">{t('settings.randomizeBtn')}</span>
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                    SALA / NÓ DE COMUNICAÇÃO INICIAL
+                    {t('settings.nodeLabel')}
                   </label>
                   <input
                     type="text"
@@ -149,7 +151,7 @@ export function WelcomeModal({
                     className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-cyan rounded-lg px-3 py-2 text-cyber-cyan font-bold outline-none transition-colors"
                   />
                   <span className="text-[10px] text-slate-500 mt-1 block">
-                    Você pode alterar a sala a qualquer momento digitando no topo do HUD.
+                    {t('stage.uplinkReadyDesc')}
                   </span>
                 </div>
               </div>
@@ -162,10 +164,10 @@ export function WelcomeModal({
               <div className="bg-cyber-card/70 border border-cyber-border rounded-xl p-3 space-y-2">
                 <div className="flex items-center gap-2 text-cyber-purple-light font-bold text-xs uppercase">
                   <Cookie className="w-3.5 h-3.5 text-cyber-purple" />
-                  <span>POLÍTICA DE COOKIES & DADOS</span>
+                  <span>{t('welcome.step2Title')}</span>
                 </div>
                 <p className="text-slate-300 text-[11px] leading-relaxed">
-                  <strong>Zero Rastreamento:</strong> Não utilizamos cookies de terceiros, pixels de anúncios ou ferramentas invasivas de telemetria.
+                  {t('welcome.step2Desc')}
                 </p>
                 <div className="border-t border-cyber-border/60 pt-2 text-[10px] text-slate-400 space-y-1">
                   <div className="flex items-start gap-1.5">
@@ -208,36 +210,19 @@ export function WelcomeModal({
             <div className="space-y-3 animate-fadeIn">
               <div className="p-3 bg-cyber-black border border-cyber-cyan/40 rounded-xl space-y-2">
                 <span className="text-cyber-cyan-bright font-bold text-xs uppercase block">
-                  3 PASSOS PARA TRANSMITIR:
+                  {t('welcome.step3Title')}
                 </span>
-                <ol className="space-y-2 text-[11px] text-slate-300">
-                  <li className="flex items-start gap-2">
-                    <span className="w-5 h-5 rounded bg-cyber-cyan/20 text-cyber-cyan font-bold flex items-center justify-center shrink-0 text-[10px]">
-                      1
-                    </span>
-                    <span><strong>Compartilhe o Link:</strong> Clique no botão superior <em>"COMPARTILHAR LINK"</em> e envie a URL para seu colega.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="w-5 h-5 rounded bg-cyber-cyan/20 text-cyber-cyan font-bold flex items-center justify-center shrink-0 text-[10px]">
-                      2
-                    </span>
-                    <span><strong>Inicie a Captura:</strong> Clique em <em>"TRANSMITIR"</em> no Quantum Dock inferior e escolha sua tela inteira ou janela.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="w-5 h-5 rounded bg-cyber-cyan/20 text-cyber-cyan font-bold flex items-center justify-center shrink-0 text-[10px]">
-                      3
-                    </span>
-                    <span><strong>Terminal Chat:</strong> Use a barra lateral direita para enviar mensagens de texto instantâneas com latência zero.</span>
-                  </li>
-                </ol>
+                <div className="text-[11px] text-slate-300 whitespace-pre-line leading-relaxed">
+                  {t('welcome.step3Desc')}
+                </div>
               </div>
 
               <div className="p-2.5 bg-cyan-950/20 border border-cyber-cyan/30 rounded-lg text-[10px] text-slate-300 space-y-1">
                 <p>
-                  🌐 <strong>Rede de Sinalização WebSockets:</strong> O WebRTC necessita de um servidor para trocar o handshake inicial (SDP/ICE). Ao rodar em rede local ou VPS, execute <code className="text-cyber-cyan font-bold">npm run server</code>. Você pode alterar a URL de sinalização a qualquer momento no ícone de ⚙️ Configurações.
+                  🌐 <strong>Rede de Sinalização WebSockets:</strong> {t('settings.signalingDesc')}
                 </p>
                 <p className="text-slate-400">
-                  💡 <strong>Instalação PWA:</strong> Você também pode instalar o Synapse como app desktop/mobile diretamente pelo navegador!
+                  💡 <strong>PWA Web App:</strong> Instale o Synapse na barra de navegação para experiência nativa sem abas.
                 </p>
               </div>
             </div>
@@ -251,7 +236,7 @@ export function WelcomeModal({
               onClick={() => setStep((s) => s - 1)}
               className="px-3 py-1.5 text-[11px] rounded bg-cyber-black border border-cyber-border text-slate-300 hover:text-slate-100 hover:border-slate-500 transition-colors"
             >
-              VOLTAR
+              {t('welcome.backBtn')}
             </button>
           ) : (
             <div />
@@ -262,7 +247,7 @@ export function WelcomeModal({
               onClick={() => setStep((s) => s + 1)}
               className="px-4 py-1.5 text-[11px] font-bold rounded bg-cyber-cyan hover:bg-cyber-cyan-bright text-slate-950 transition-all flex items-center gap-1.5 shadow-glow-cyan-sm"
             >
-              <span>AVANÇAR</span>
+              <span>{t('welcome.nextBtn')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           ) : (
@@ -276,7 +261,7 @@ export function WelcomeModal({
               }`}
             >
               <Check className="w-4 h-4" />
-              <span>INICIALIZAR SYNAPSE CORE</span>
+              <span>{t('welcome.finishBtn')}</span>
             </button>
           )}
         </div>

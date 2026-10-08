@@ -71,7 +71,11 @@ export function App() {
   const [operatorId, setOperatorId] = useState(getInitialOperator);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => !localStorage.getItem('synapse_onboarded'));
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => {
+    const hasRoomParam = new URLSearchParams(window.location.search).has('room');
+    if (hasRoomParam) return false;
+    return !localStorage.getItem('synapse_onboarded');
+  });
   const [isBooting, setIsBooting] = useState(true);
 
   const logDiagRef = useRef(null);
@@ -118,6 +122,15 @@ export function App() {
   } = useMediaStream({
     onScreenEnded: () => {
       // When screen sharing stops from OS browser prompt
+      if (pcRef.current) {
+        const senders = pcRef.current.getSenders();
+        senders.forEach((s) => {
+          if (s.track && s.track.kind === 'video') {
+            pcRef.current.removeTrack(s);
+          }
+        });
+        sendOffer();
+      }
     },
     onLog: (msg, level) => {
       if (logDiagRef.current) logDiagRef.current(msg, level);
@@ -128,8 +141,10 @@ export function App() {
   const {
     pcRef,
     connectionState,
+    signalingState,
     iceState,
     remoteStream,
+    remotePeerId,
     chatMessages,
     diagLogs,
     metrics,
@@ -170,6 +185,7 @@ export function App() {
             pcRef.current.removeTrack(s);
           }
         });
+        await sendOffer();
       }
     } else {
       try {
@@ -256,11 +272,17 @@ export function App() {
         <main className="flex-1 flex flex-col relative p-2.5 sm:p-3.5 min-w-0 bg-cyber-black">
           {/* Main Video Viewport & Telemetry HUD */}
           <StageViewer
+            roomId={roomId}
+            roomPassword={roomPassword}
             localStream={screenStream}
             remoteStream={remoteStream}
             isScreenSharing={isScreenSharing}
             metrics={metrics}
             isDeafened={isDeafened}
+            connectionState={connectionState}
+            signalingState={signalingState}
+            remotePeerId={remotePeerId}
+            onToggleScreenShare={handleToggleScreenShare}
           />
 
           {/* Floating Quantum Dock Controls */}

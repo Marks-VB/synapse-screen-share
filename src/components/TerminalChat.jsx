@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Trash2 } from 'lucide-react';
+import { useI18n } from '../i18n/I18nContext';
 
 export function TerminalChat({
   isOpen,
@@ -10,6 +11,7 @@ export function TerminalChat({
   onClearLogs,
   operatorId
 }) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('terminal');
   const [inputText, setInputText] = useState('');
 
@@ -46,7 +48,7 @@ export function TerminalChat({
                 : 'text-slate-400 hover:text-slate-200 hover:bg-cyber-card/80 border border-transparent'
             }`}
           >
-            TERMINAL
+            {t('terminal.tabChat')}
           </button>
           <button
             onClick={() => setActiveTab('diagnostics')}
@@ -56,7 +58,7 @@ export function TerminalChat({
                 : 'text-slate-400 hover:text-slate-200 hover:bg-cyber-card/80 border border-transparent'
             }`}
           >
-            DIAGNOSTICS
+            {t('terminal.tabDiag')}
           </button>
         </div>
         <span className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">
@@ -103,22 +105,22 @@ export function TerminalChat({
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <span className="text-cyber-cyan-bright font-bold text-xs" aria-hidden="true">&gt;</span>
               <label htmlFor="terminal-chat-input" className="sr-only">
-                Mensagem do terminal
+                {t('terminal.inputPlaceholder')}
               </label>
               <input
                 id="terminal-chat-input"
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Broadcast command or message..."
-                aria-label="Broadcast command or message"
+                placeholder={t('terminal.inputPlaceholder')}
+                aria-label={t('terminal.inputPlaceholder')}
                 className="flex-1 bg-transparent text-slate-100 text-xs font-mono outline-none placeholder:text-slate-500"
               />
               <button
                 type="submit"
-                aria-label="Enviar mensagem"
+                aria-label={t('terminal.sendBtn')}
                 className="p-1.5 rounded-lg bg-cyber-cyan/15 hover:bg-cyber-cyan/25 active:scale-[0.95] text-cyber-cyan-bright transition-transform transition-colors duration-150 ease-out-quick border border-cyber-cyan/30"
-                title="Send Message"
+                title={t('terminal.sendBtn')}
               >
                 <Send className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -159,11 +161,11 @@ export function TerminalChat({
             </span>
             <button
               onClick={onClearLogs}
-              aria-label="Limpar logs de diagnóstico"
+              aria-label={t('terminal.clearLogsBtn')}
               className="flex items-center gap-1 text-slate-300 hover:text-white active:scale-[0.96] transition-transform transition-colors duration-150 ease-out-quick uppercase text-[10px]"
             >
               <Trash2 className="w-3 h-3" aria-hidden="true" />
-              <span>CLEAR LOGS</span>
+              <span>{t('terminal.clearLogsBtn')}</span>
             </button>
           </div>
         </div>

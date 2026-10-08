@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Network, Server, Hash, ShieldCheck, Check, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { X, Network, Server, Hash, ShieldCheck, Check, Lock, Eye, EyeOff, Sparkles, Languages } from 'lucide-react';
 import { generateSecurePin } from '../utils/security';
+import { useI18n } from '../i18n/I18nContext';
 
 export function ModalSettings({
   isOpen,
@@ -11,6 +12,7 @@ export function ModalSettings({
   roomPassword = '',
   onSave
 }) {
+  const { t, language, setLanguage, supportedLanguages } = useI18n();
   const [formSignalingUrl, setFormSignalingUrl] = useState(signalingUrl);
   const [formRoomId, setFormRoomId] = useState(roomId);
   const [formOperatorId, setFormOperatorId] = useState(operatorId);
@@ -62,11 +64,36 @@ export function ModalSettings({
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-5 space-y-4">
+          {/* Language Selection */}
+          <div>
+            <label className="flex items-center gap-1.5 text-slate-300 font-semibold mb-1.5 uppercase tracking-wider text-[11px]">
+              <Languages className="w-3.5 h-3.5 text-cyber-cyan" />
+              <span>{t('settings.languageLabel')}</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {supportedLanguages.map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setLanguage(lang.code)}
+                  className={`py-2 px-2.5 rounded-lg border text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all ${
+                    language === lang.code
+                      ? 'bg-cyber-cyan/20 border-cyber-cyan text-cyber-cyan-bright shadow-glow-cyan-sm'
+                      : 'bg-cyber-black border-cyber-border text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                  }`}
+                >
+                  <span>{lang.flag}</span>
+                  <span>{lang.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Signaling Server URL */}
           <div>
             <label className="flex items-center gap-1.5 text-slate-300 font-semibold mb-1.5 uppercase tracking-wider text-[11px]">
               <Server className="w-3.5 h-3.5 text-cyber-cyan" />
-              <span>SIGNALING UPLINK (WEBSOCKET URL)</span>
+              <span>{t('settings.signalingLabel')}</span>
             </label>
             <input
               type="text"
@@ -83,11 +110,11 @@ export function ModalSettings({
                 onClick={() => setFormSignalingUrl('ws://localhost:3000')}
                 className="text-[10px] px-2 py-0.5 rounded bg-cyber-card hover:bg-cyber-cyan/20 border border-cyber-border hover:border-cyber-cyan/40 text-cyber-cyan transition-colors"
               >
-                Localhost (ws://localhost:3000)
+                {t('settings.presetLocalhost')}
               </button>
             </div>
             <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-              O Cloudflare Pages hospeda o frontend PWA. O servidor WebRTC de sinalização (<code className="text-slate-400">server.js</code>) roda localmente via <code className="text-cyber-cyan">npm run server</code> ou pode ser hospedado no Render / Fly.io / Railway.
+              {t('settings.signalingDesc')}
             </p>
           </div>
 
@@ -95,7 +122,7 @@ export function ModalSettings({
           <div>
             <label className="flex items-center gap-1.5 text-slate-300 font-semibold mb-1.5 uppercase tracking-wider text-[11px]">
               <Hash className="w-3.5 h-3.5 text-cyber-purple-light" />
-              <span>NETWORK NODE // ROOM ID</span>
+              <span>{t('settings.nodeLabel')}</span>
             </label>
             <input
               type="text"
@@ -112,16 +139,16 @@ export function ModalSettings({
             <div className="flex items-center justify-between mb-1.5">
               <label className="flex items-center gap-1.5 text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
                 <Lock className="w-3.5 h-3.5 text-cyber-green" />
-                <span>SENHA DA SALA (OPCIONAL)</span>
+                <span>{t('settings.passwordLabel')}</span>
               </label>
               <button
                 type="button"
                 onClick={handleGeneratePin}
                 className="text-[10px] text-cyber-cyan hover:underline flex items-center gap-1"
-                title="Gerar PIN de 6 dígitos aleatório"
+                title="Generate 6-digit random PIN"
               >
                 <Sparkles className="w-3 h-3" />
-                <span>GERAR PIN</span>
+                <span>{t('settings.generatePin')}</span>
               </button>
             </div>
             <div className="relative flex items-center">
@@ -129,20 +156,20 @@ export function ModalSettings({
                 type={showPassword ? 'text' : 'password'}
                 value={formPassword}
                 onChange={(e) => setFormPassword(e.target.value)}
-                placeholder="Deixe em branco para sala aberta pública"
+                placeholder={t('settings.passwordPlaceholder')}
                 className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-green rounded-lg px-3 py-2 pr-10 text-cyber-green font-mono tracking-wider outline-none transition-colors duration-150 ease-out-quick"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute right-2.5 p-1 text-slate-400 hover:text-cyber-green transition-colors"
-                title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
             <p className="text-[10px] text-slate-500 mt-1">
-              {formPassword ? '🔒 Apenas participantes com esta senha poderão conectar nesta sala.' : '🔓 Sala aberta: qualquer pessoa com o link pode conectar.'}
+              {formPassword ? t('settings.passwordLockedDesc') : t('settings.passwordOpenDesc')}
             </p>
           </div>
 
@@ -150,7 +177,7 @@ export function ModalSettings({
           <div>
             <label className="flex items-center gap-1.5 text-slate-300 font-semibold mb-1.5 uppercase tracking-wider text-[11px]">
               <ShieldCheck className="w-3.5 h-3.5 text-cyber-green" />
-              <span>OPERATOR CALLSIGN</span>
+              <span>{t('settings.operatorLabel')}</span>
             </label>
             <input
               type="text"
@@ -169,14 +196,14 @@ export function ModalSettings({
               onClick={onClose}
               className="px-4 py-2 rounded-lg bg-cyber-card hover:bg-cyber-card-hover border border-cyber-border active:scale-[0.97] text-slate-300 transition-transform transition-colors duration-150 ease-out-quick"
             >
-              CANCEL
+              {t('settings.cancelBtn')}
             </button>
             <button
               type="submit"
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyber-cyan hover:bg-cyber-cyan-bright text-cyber-black font-bold tracking-wider uppercase transition-transform transition-colors duration-150 ease-out-quick shadow-glow-cyan active:scale-[0.97]"
             >
               <Check className="w-4 h-4" />
-              <span>SAVE & RECONNECT</span>
+              <span>{t('settings.saveBtn')}</span>
             </button>
           </div>
         </form>

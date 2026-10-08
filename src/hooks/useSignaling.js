@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-const MAX_RECONNECT_ATTEMPTS = 2;
+const MAX_FAST_RECONNECT_ATTEMPTS = 5;
+const BACKGROUND_RECONNECT_INTERVAL_MS = 10000;
 
 /**
  * Custom hook dedicated strictly to WebSocket signaling transport.
@@ -20,7 +21,10 @@ export function useSignaling({
   const isManuallyClosedRef = useRef(false);
   const retryCountRef = useRef(0);
 
-  // Preserve latest callbacks in mutable refs to keep connect() callback reference stable
+  // Preserve latest callbacks and credentials in mutable refs
+  const passwordHashRef = useRef(passwordHash);
+  passwordHashRef.current = passwordHash;
+
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
 
@@ -54,12 +58,9 @@ export function useSignaling({
       isManuallyClosedRef.current = false;
     }
 
-    // Prevent clobbering an existing healthy or pending socket
+    // Clean up existing socket if manually resetting or stale
     if (wsRef.current) {
-      if (wsRef.current.readyState === WebSocket.OPEN) {
-        return;
-      }
-      if (wsRef.current.readyState === WebSocket.CONNECTING) {
+      if (!isManualReset && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
         return;
       }
       try {
@@ -85,7 +86,7 @@ export function useSignaling({
           type: 'join-room',
           roomId,
           peerId: operatorId,
-          passwordHash: passwordHash || null
+          passwordHash: passwordHashRef.current || null
         });
       };
 
@@ -109,12 +110,12 @@ export function useSignaling({
           return;
         }
 
-        if (retryCountRef.current < MAX_RECONNECT_ATTEMPTS) {
+        if (retryCountRef.current < MAX_FAST_RECONNECT_ATTEMPTS) {
           retryCountRef.current += 1;
           const delay = Math.min(1000 * Math.pow(1.8, retryCountRef.current - 1), 6000);
           setConnectionState('reconnecting');
           log(
-            `[SIGNALING] Conectando ao canal (${retryCountRef.current}/${MAX_RECONNECT_ATTEMPTS})...`,
+            `[SIGNALING] Conectando ao canal (${retryCountRef.current}/${MAX_FAST_RECONNECT_ATTEMPTS})...`,
             'INFO'
           );
 
@@ -125,9 +126,14 @@ export function useSignaling({
         } else {
           setConnectionState('standby');
           log(
-            `[SIGNALING] Canal em modo de espera (STANDBY). Use 'npm run server' ou configure a URL de sinalização em Configurações.`,
+            `[SIGNALING] Canal em modo de espera (STANDBY). Use 'npm run server' ou configure a URL de sinalização em Configurações. Tentando novamente em segundo plano...`,
             'INFO'
           );
+          // Keep a low-frequency background heartbeat reconnect attempt
+          if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = setTimeout(() => {
+            performConnect(false);
+          }, BACKGROUND_RECONNECT_INTERVAL_MS);
         }
       };
 
@@ -138,7 +144,7 @@ export function useSignaling({
       setConnectionState('standby');
       log(`[SIGNALING] Inicialização em modo de espera: ${err.message}`, 'INFO');
     }
-  }, [signalingUrl, roomId, operatorId, passwordHash, send, log]);
+  }, [signalingUrl, roomId, operatorId, send, log]);
 
   // Connect cleanly on demand
   const connect = useCallback(() => {
@@ -198,6 +204,19 @@ export function useSignaling({
       }
     };
   }, [performConnect]);
+
+  // Re-authenticate if passwordHash updates while socket is already open
+  useEffect(() => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && passwordHash) {
+      log(`[SIGNALING] Updating authentication credentials for Node [${roomId}]...`, 'INFO');
+      send({
+        type: 'join-room',
+        roomId,
+        peerId: operatorId,
+        passwordHash
+      });
+    }
+  }, [passwordHash, roomId, operatorId, send, log]);
 
   return {
     connectionState,

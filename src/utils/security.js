@@ -86,3 +86,37 @@ export function isValidSignalingUrl(url) {
     return false;
   }
 }
+
+/**
+ * Robust cross-browser clipboard copy with fallback for non-secure contexts (HTTP / LAN)
+ */
+export async function copyToClipboard(text) {
+  if (!text) return false;
+  if (typeof navigator !== 'undefined' && navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback to execCommand below
+    }
+  }
+
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    textarea.style.top = '-9999px';
+    textarea.style.opacity = '0';
+    textarea.setAttribute('readonly', '');
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return successful;
+  } catch (err) {
+    console.error('Copy to clipboard failed:', err);
+    return false;
+  }
+}

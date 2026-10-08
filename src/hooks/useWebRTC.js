@@ -49,13 +49,22 @@ export function useWebRTC({
     packetLossPct: 0
   });
 
-  // Persistent references preventing unnecessary re-renders
+  // Persistent references preventing unnecessary re-renders & closure staleness
   const pcRef = useRef(null);
   const dataChannelRef = useRef(null);
   const remoteStreamRef = useRef(null);
-  const pendingCandidatesRef = useRef([]);
+  const remotePeerIdRef = useRef(null);
+  const pendingRemoteCandidatesRef = useRef([]);
+  const pendingLocalCandidatesRef = useRef([]);
   const statsIntervalRef = useRef(null);
   const prevStatsStateRef = useRef({});
+  const sendSignalingRef = useRef(null);
+
+  // Synchronize remotePeerId in state and ref
+  const updateRemotePeer = useCallback((id) => {
+    remotePeerIdRef.current = id;
+    setRemotePeerId(id);
+  }, []);
 
   // Append diagnostic log
   const logDiag = useCallback((msg, level = 'INFO') => {
@@ -108,16 +117,34 @@ export function useWebRTC({
     });
   }, []);
 
-  // Flush queued candidates once remoteDescription is set
-  const drainPendingCandidates = useCallback(async (pc) => {
-    if (pc && pendingCandidatesRef.current.length > 0) {
-      logDiag(`Flushing ${pendingCandidatesRef.current.length} queued ICE candidates...`, 'INFO');
-      while (pendingCandidatesRef.current.length > 0) {
-        const candidate = pendingCandidatesRef.current.shift();
+  // Flush queued remote candidates once remoteDescription is set
+  const drainPendingRemoteCandidates = useCallback(async (pc) => {
+    if (pc && pendingRemoteCandidatesRef.current.length > 0) {
+      logDiag(`Flushing ${pendingRemoteCandidatesRef.current.length} queued remote ICE candidates...`, 'INFO');
+      while (pendingRemoteCandidatesRef.current.length > 0) {
+        const candidate = pendingRemoteCandidatesRef.current.shift();
         try {
           await pc.addIceCandidate(candidate);
         } catch (e) {
           // Ignore duplicate / stale candidates
+        }
+      }
+    }
+  }, [logDiag]);
+
+  // Flush queued local candidates once remote peer target is known
+  const drainPendingLocalCandidates = useCallback((targetPeer) => {
+    const target = targetPeer || remotePeerIdRef.current;
+    if (target && pendingLocalCandidatesRef.current.length > 0) {
+      logDiag(`Flushing ${pendingLocalCandidatesRef.current.length} queued local ICE candidates to ${target}...`, 'INFO');
+      while (pendingLocalCandidatesRef.current.length > 0) {
+        const candidate = pendingLocalCandidatesRef.current.shift();
+        if (sendSignalingRef.current) {
+          sendSignalingRef.current({
+            type: 'ice-candidate',
+            target,
+            candidate: candidate.toJSON ? candidate.toJSON() : candidate
+          });
         }
       }
     }
@@ -150,7 +177,7 @@ export function useWebRTC({
   }, [addChatMessage, logDiag]);
 
   // Initialize or return PeerConnection
-  const ensurePeerConnection = useCallback((sendSignalingFn) => {
+  const ensurePeerConnection = useCallback(() => {
     if (pcRef.current && pcRef.current.signalingState !== 'closed') {
       return pcRef.current;
     }
@@ -164,12 +191,17 @@ export function useWebRTC({
     });
 
     pc.onicecandidate = (event) => {
-      if (event.candidate && remotePeerId && sendSignalingFn) {
-        sendSignalingFn({
-          type: 'ice-candidate',
-          target: remotePeerId,
-          candidate: event.candidate
-        });
+      if (event.candidate) {
+        const target = remotePeerIdRef.current;
+        if (target && sendSignalingRef.current) {
+          sendSignalingRef.current({
+            type: 'ice-candidate',
+            target,
+            candidate: event.candidate.toJSON ? event.candidate.toJSON() : event.candidate
+          });
+        } else {
+          pendingLocalCandidatesRef.current.push(event.candidate);
+        }
       }
     };
 
@@ -208,7 +240,7 @@ export function useWebRTC({
 
     pcRef.current = pc;
     return pc;
-  }, [logDiag, onRemoteStreamReceived, remotePeerId, setupDataChannel, startTelemetry, stopTelemetry]);
+  }, [logDiag, onRemoteStreamReceived, setupDataChannel, startTelemetry, stopTelemetry]);
 
   // Cleanly close WebRTC connection and media transceivers
   const closeConnection = useCallback(() => {
@@ -236,20 +268,62 @@ export function useWebRTC({
       remoteStreamRef.current = null;
     }
 
+    pendingRemoteCandidatesRef.current = [];
+    pendingLocalCandidatesRef.current = [];
     setRemoteStream(null);
     setWebrtcState('idle');
     setIceState('new');
     addChatMessage('SYSTEM', 'Uplink terminated.', true);
   }, [addChatMessage, logDiag, stopTelemetry]);
 
+  // Create and send SDP Offer
+  const sendOffer = useCallback(async (targetPeer) => {
+    const target = targetPeer || remotePeerIdRef.current;
+    if (!target) {
+      logDiag('Offer deferred: waiting for remote peer to enter Node...', 'INFO');
+      return;
+    }
+
+    const pc = ensurePeerConnection();
+    try {
+      logDiag(`Formulating SDP Offer for peer ${target}...`, 'SIGNAL');
+
+      if (!dataChannelRef.current || dataChannelRef.current.readyState === 'closed') {
+        const dc = pc.createDataChannel('synapse-terminal', { ordered: true });
+        setupDataChannel(dc);
+      }
+
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      });
+      await pc.setLocalDescription(offer);
+
+      if (sendSignalingRef.current) {
+        sendSignalingRef.current({
+          type: 'offer',
+          target,
+          sdp: pc.localDescription
+        });
+      }
+      drainPendingLocalCandidates(target);
+    } catch (err) {
+      logDiag(`SDP Offer creation failed: ${err.message}`, 'ERROR');
+    }
+  }, [drainPendingLocalCandidates, ensurePeerConnection, logDiag, setupDataChannel]);
+
   // Handle incoming signaling messages
-  const handleSignalingMessage = useCallback(async (msg, sendSignalingFn) => {
+  const handleSignalingMessage = useCallback(async (msg) => {
     switch (msg.type) {
       case 'room-joined': {
         logDiag(`Uplink established in Node [${msg.roomId}]. Peers: ${msg.peers.length}${msg.isProtected ? ' [PROTEGIDO]' : ''}`, 'SUCCESS');
         if (msg.peers.length > 0) {
-          setRemotePeerId(msg.peers[0]);
-          logDiag(`Target peer identified: ${msg.peers[0]}`, 'INFO');
+          const hostPeer = msg.peers[0];
+          updateRemotePeer(hostPeer);
+          logDiag(`Target peer identified: ${hostPeer}. Awaiting WebRTC offer...`, 'INFO');
+          // Prepare PeerConnection ready to receive incoming offer
+          ensurePeerConnection();
+          drainPendingLocalCandidates(hostPeer);
         }
         break;
       }
@@ -263,9 +337,15 @@ export function useWebRTC({
         break;
       }
       case 'peer-joined': {
-        logDiag(`Remote peer entered Node: ${msg.peerId}`, 'INFO');
-        setRemotePeerId(msg.peerId);
-        addChatMessage('SYSTEM', `Peer ${msg.peerId} established uplink.`, true);
+        const newPeerId = msg.peerId;
+        logDiag(`Remote peer entered Node: ${newPeerId}. Initiating WebRTC uplink...`, 'INFO');
+        updateRemotePeer(newPeerId);
+        addChatMessage('SYSTEM', `Peer ${newPeerId} established uplink.`, true);
+
+        drainPendingLocalCandidates(newPeerId);
+
+        // Host / Existing occupant sends the offer to the newly arrived peer
+        await sendOffer(newPeerId);
         break;
       }
       case 'offer': {
@@ -273,21 +353,29 @@ export function useWebRTC({
           logDiag('Rejected malformed SDP Offer payload.', 'WARN');
           return;
         }
-        setRemotePeerId(msg.from);
-        const pc = ensurePeerConnection(sendSignalingFn);
+        updateRemotePeer(msg.from);
+        const pc = ensurePeerConnection();
         try {
+          // Polite peer rollback if an offer collision occurs
+          if (pc.signalingState === 'have-local-offer') {
+            await pc.setLocalDescription({ type: 'rollback' });
+          }
+
           await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-          await drainPendingCandidates(pc);
+          await drainPendingRemoteCandidates(pc);
 
           logDiag(`SDP Offer ingested from ${msg.from}. Creating Answer...`, 'SIGNAL');
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
-          sendSignalingFn({
-            type: 'answer',
-            target: msg.from,
-            sdp: pc.localDescription
-          });
+          if (sendSignalingRef.current) {
+            sendSignalingRef.current({
+              type: 'answer',
+              target: msg.from,
+              sdp: pc.localDescription
+            });
+          }
+          drainPendingLocalCandidates(msg.from);
         } catch (err) {
           logDiag(`SDP Offer handling failed: ${err.message}`, 'ERROR');
         }
@@ -298,9 +386,13 @@ export function useWebRTC({
           logDiag('Rejected malformed SDP Answer payload.', 'WARN');
           return;
         }
+        if (msg.from) {
+          updateRemotePeer(msg.from);
+        }
         try {
           await pcRef.current.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-          await drainPendingCandidates(pcRef.current);
+          await drainPendingRemoteCandidates(pcRef.current);
+          drainPendingLocalCandidates(msg.from || remotePeerIdRef.current);
           logDiag('Remote SDP Answer synced.', 'SUCCESS');
         } catch (err) {
           logDiag(`SDP Answer handling failed: ${err.message}`, 'ERROR');
@@ -308,7 +400,7 @@ export function useWebRTC({
         break;
       }
       case 'ice-candidate': {
-        if (msg.candidate && typeof msg.candidate.candidate === 'string') {
+        if (msg.candidate && (typeof msg.candidate.candidate === 'string' || msg.candidate.candidate === '')) {
           const candidate = new RTCIceCandidate(msg.candidate);
           if (pcRef.current && pcRef.current.remoteDescription && pcRef.current.remoteDescription.type) {
             try {
@@ -317,7 +409,7 @@ export function useWebRTC({
               // Ignore duplicate candidate
             }
           } else {
-            pendingCandidatesRef.current.push(candidate);
+            pendingRemoteCandidatesRef.current.push(candidate);
           }
         }
         break;
@@ -325,6 +417,9 @@ export function useWebRTC({
       case 'peer-disconnected': {
         logDiag(`Peer ${msg.peerId} disconnected.`, 'WARN');
         addChatMessage('SYSTEM', `Peer ${msg.peerId} severed link.`, true);
+        if (remotePeerIdRef.current === msg.peerId) {
+          remotePeerIdRef.current = null;
+        }
         setRemotePeerId((current) => (current === msg.peerId ? null : current));
         setRemoteStream(null);
         stopTelemetry();
@@ -333,11 +428,9 @@ export function useWebRTC({
       default:
         break;
     }
-  }, [addChatMessage, drainPendingCandidates, ensurePeerConnection, logDiag, stopTelemetry]);
+  }, [addChatMessage, drainPendingLocalCandidates, drainPendingRemoteCandidates, ensurePeerConnection, logDiag, sendOffer, stopTelemetry, updateRemotePeer]);
 
   // Dedicated WebSocket Transport Hook
-  const sendSignalingRef = useRef(null);
-
   const {
     connectionState: signalingState,
     send: sendSignaling,
@@ -349,39 +442,12 @@ export function useWebRTC({
     operatorId,
     passwordHash,
     onMessage: useCallback((msg) => {
-      handleSignalingMessage(msg, sendSignalingRef.current);
+      handleSignalingMessage(msg);
     }, [handleSignalingMessage]),
     onLog: logDiag
   });
 
   sendSignalingRef.current = sendSignaling;
-
-  // Create and send SDP Offer
-  const sendOffer = useCallback(async (targetPeer = remotePeerId) => {
-    const pc = ensurePeerConnection(sendSignaling);
-    try {
-      logDiag(`Formulating SDP Offer for peer ${targetPeer}...`, 'SIGNAL');
-
-      if (!dataChannelRef.current) {
-        const dc = pc.createDataChannel('synapse-terminal', { ordered: true });
-        setupDataChannel(dc);
-      }
-
-      const offer = await pc.createOffer({
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
-      });
-      await pc.setLocalDescription(offer);
-
-      sendSignaling({
-        type: 'offer',
-        target: targetPeer,
-        sdp: pc.localDescription
-      });
-    } catch (err) {
-      logDiag(`SDP Offer creation failed: ${err.message}`, 'ERROR');
-    }
-  }, [ensurePeerConnection, logDiag, remotePeerId, sendSignaling, setupDataChannel]);
 
   // Send message over DataChannel
   const sendMessage = useCallback((text) => {
@@ -404,12 +470,16 @@ export function useWebRTC({
 
   // Attach local media stream tracks to RTCPeerConnection
   const attachLocalStream = useCallback((stream) => {
-    const pc = ensurePeerConnection(sendSignaling);
+    const pc = ensurePeerConnection();
+    const existingSenders = pc.getSenders();
     stream.getTracks().forEach((track) => {
-      pc.addTrack(track, stream);
+      const alreadyAdded = existingSenders.some((s) => s.track && s.track.id === track.id);
+      if (!alreadyAdded) {
+        pc.addTrack(track, stream);
+      }
     });
     logDiag('Local media tracks attached to RTCPeerConnection.', 'SUCCESS');
-  }, [ensurePeerConnection, logDiag, sendSignaling]);
+  }, [ensurePeerConnection, logDiag]);
 
   const clearLogs = useCallback(() => {
     setDiagLogs([]);
@@ -450,3 +520,4 @@ export function useWebRTC({
     logDiag
   };
 }
+export default useWebRTC;

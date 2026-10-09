@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Network, Server, Hash, ShieldCheck, Check, Lock, Eye, EyeOff, Sparkles, Languages } from 'lucide-react';
+import { X, Network, Server, Hash, ShieldCheck, Check, Lock, Eye, EyeOff, Sparkles, Languages, Radio, Tv } from 'lucide-react';
 import { generateSecurePin } from '../utils/security';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -10,6 +10,10 @@ export function ModalSettings({
   roomId,
   operatorId,
   roomPassword = '',
+  iceServerUrl = '',
+  iceServerUsername = '',
+  iceServerCredential = '',
+  autoPip = true,
   onSave
 }) {
   const { t, language, setLanguage, supportedLanguages } = useI18n();
@@ -18,6 +22,12 @@ export function ModalSettings({
   const [formOperatorId, setFormOperatorId] = useState(operatorId);
   const [formPassword, setFormPassword] = useState(roomPassword);
   const [showPassword, setShowPassword] = useState(false);
+
+  // TURN Relay & Auto-PiP state
+  const [formTurnUrl, setFormTurnUrl] = useState(iceServerUrl);
+  const [formTurnUser, setFormTurnUser] = useState(iceServerUsername);
+  const [formTurnCred, setFormTurnCred] = useState(iceServerCredential);
+  const [formAutoPip, setFormAutoPip] = useState(autoPip);
 
   if (!isOpen) return null;
 
@@ -38,20 +48,24 @@ export function ModalSettings({
       signalingUrl: cleanUrl,
       roomId: cleanRoom || roomId,
       operatorId: cleanOperator || operatorId,
-      roomPassword: cleanPassword
+      roomPassword: cleanPassword,
+      iceServerUrl: formTurnUrl.trim(),
+      iceServerUsername: formTurnUser.trim(),
+      iceServerCredential: formTurnCred.trim(),
+      autoPip: formAutoPip
     });
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-cyber-void/80 backdrop-blur-sm p-4 transition-opacity duration-200">
-      <div className="w-full max-w-md bg-cyber-dark border border-cyber-cyan/40 rounded-2xl shadow-glow-cyan-lg overflow-hidden font-mono text-xs animate-modal-enter">
+      <div className="w-full max-w-md max-h-[90vh] bg-cyber-dark border border-cyber-cyan/40 rounded-2xl shadow-glow-cyan-lg overflow-y-auto font-mono text-xs animate-modal-enter">
         {/* Header */}
-        <div className="p-4 border-b border-cyber-border bg-cyber-card flex items-center justify-between">
+        <div className="sticky top-0 z-10 p-4 border-b border-cyber-border bg-cyber-card flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Network className="w-4 h-4 text-cyber-cyan" />
             <span className="font-headline font-bold text-sm uppercase text-slate-100 tracking-wide">
-              SYNAPSE CORE CONFIGURATION
+              {t('settings.title')}
             </span>
           </div>
           <button
@@ -99,7 +113,7 @@ export function ModalSettings({
               type="text"
               value={formSignalingUrl}
               onChange={(e) => setFormSignalingUrl(e.target.value)}
-              placeholder="ws://localhost:3000 ou wss://seu-servidor.onrender.com"
+              placeholder="ws://localhost:3000 ou wss://seu-servidor.com"
               className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-cyan rounded-lg px-3 py-2 text-cyber-cyan-bright outline-none transition-colors duration-150 ease-out-quick"
               required
             />
@@ -116,6 +130,62 @@ export function ModalSettings({
             <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
               {t('settings.signalingDesc')}
             </p>
+          </div>
+
+          {/* TURN Relay Server (NAT & Firewall Traversal) */}
+          <div className="border border-cyber-border/70 rounded-xl p-3 bg-cyber-black/40 space-y-2.5">
+            <label className="flex items-center gap-1.5 text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
+              <Radio className="w-3.5 h-3.5 text-cyber-amber" />
+              <span>{t('settings.turnLabel')}</span>
+            </label>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {t('settings.turnDesc')}
+            </p>
+            <input
+              type="text"
+              value={formTurnUrl}
+              onChange={(e) => setFormTurnUrl(e.target.value)}
+              placeholder={t('settings.turnUrlPlaceholder')}
+              className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-amber rounded-lg px-3 py-1.5 text-cyber-amber font-mono text-[11px] outline-none"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                value={formTurnUser}
+                onChange={(e) => setFormTurnUser(e.target.value)}
+                placeholder={t('settings.turnUserPlaceholder')}
+                className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-amber rounded-lg px-3 py-1.5 text-slate-200 font-mono text-[11px] outline-none"
+              />
+              <input
+                type="password"
+                value={formTurnCred}
+                onChange={(e) => setFormTurnCred(e.target.value)}
+                placeholder={t('settings.turnCredPlaceholder')}
+                className="w-full bg-cyber-black border border-cyber-border focus:border-cyber-amber rounded-lg px-3 py-1.5 text-slate-200 font-mono text-[11px] outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Auto Picture-in-Picture Setting */}
+          <div className="border border-cyber-border/70 rounded-xl p-3 bg-cyber-black/40 flex items-center justify-between gap-3">
+            <div className="flex items-start gap-2">
+              <Tv className="w-4 h-4 text-cyber-cyan shrink-0 mt-0.5" />
+              <div>
+                <span className="text-slate-200 font-semibold text-[11px] uppercase block">
+                  {t('settings.autoPipLabel')}
+                </span>
+                <span className="text-slate-400 text-[10px] leading-tight block">
+                  {t('settings.autoPipDesc')}
+                </span>
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              id="auto-pip-checkbox"
+              checked={formAutoPip}
+              onChange={(e) => setFormAutoPip(e.target.checked)}
+              className="w-4 h-4 accent-cyan-500 rounded cursor-pointer"
+            />
           </div>
 
           {/* Node / Room ID */}
@@ -211,3 +281,4 @@ export function ModalSettings({
     </div>
   );
 }
+export default ModalSettings;

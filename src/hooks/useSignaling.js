@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+import { computeChallengeResponse } from '../utils/security';
+
 const MAX_FAST_RECONNECT_ATTEMPTS = 5;
 const BACKGROUND_RECONNECT_INTERVAL_MS = 10000;
 
@@ -93,6 +95,22 @@ export function useSignaling({
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+
+          // Handle HMAC challenge response automatically if password hash is present
+          if (data && data.type === 'auth-required' && data.challenge && passwordHashRef.current) {
+            computeChallengeResponse(passwordHashRef.current, data.challenge).then((token) => {
+              if (token) {
+                log('[SIGNALING] Submitting HMAC challenge response for authentication...', 'SECURITY');
+                send({
+                  type: 'auth-response',
+                  roomId,
+                  peerId: operatorId,
+                  token
+                });
+              }
+            });
+          }
+
           if (onMessageRef.current) {
             onMessageRef.current(data);
           }

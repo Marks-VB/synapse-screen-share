@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight, HelpCircle, Lock, Unlock, KeyRound, Copy } from 'lucide-react';
+import { Zap, Link2, Check, Settings, PanelRightClose, PanelRightOpen, Dices, ArrowRight, HelpCircle, Lock, Unlock, KeyRound } from 'lucide-react';
 import { generateSecureRoomId, copyToClipboard } from '../utils/security';
 import { useI18n } from '../i18n/I18nContext';
 

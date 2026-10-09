@@ -15,6 +15,17 @@ export function useMediaStream({ onScreenEnded, onLog }) {
     if (onLog) onLog(msg, level);
   }, [onLog]);
 
+  // Stop Screen Share
+  const stopScreenShare = useCallback(() => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((track) => track.stop());
+      screenStreamRef.current = null;
+    }
+    setScreenStream(null);
+    setIsScreenSharing(false);
+    log('Screen share pipeline stopped.', 'INFO');
+  }, [log]);
+
   // Start Screen Capture (1080p60 with system audio)
   const startScreenShare = useCallback(async () => {
     try {
@@ -57,18 +68,7 @@ export function useMediaStream({ onScreenEnded, onLog }) {
       log(`Display media acquisition failed: ${err.message}`, 'ERROR');
       throw err;
     }
-  }, [log, onScreenEnded]);
-
-  // Stop Screen Share
-  const stopScreenShare = useCallback(() => {
-    if (screenStreamRef.current) {
-      screenStreamRef.current.getTracks().forEach((track) => track.stop());
-      screenStreamRef.current = null;
-    }
-    setScreenStream(null);
-    setIsScreenSharing(false);
-    log('Screen share pipeline stopped.', 'INFO');
-  }, [log]);
+  }, [log, onScreenEnded, stopScreenShare]);
 
   // Toggle Microphone
   const toggleMicrophone = useCallback(async (pc) => {

@@ -77,13 +77,59 @@ export async function hashPassword(password, salt = '') {
   }
 }
 
-export function isValidSignalingUrl(url) {
+export function isValidSignalingUrl(url, enforceWssInHttps = true) {
   if (!url || typeof url !== 'string') return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'ws:' || parsed.protocol === 'wss:';
+    if (parsed.protocol !== 'ws:' && parsed.protocol !== 'wss:') {
+      return false;
+    }
+    // Enforce WSS when running in HTTPS production contexts
+    if (
+      enforceWssInHttps &&
+      typeof window !== 'undefined' &&
+      window.location &&
+      window.location.protocol === 'https:'
+    ) {
+      const isLocal =
+        parsed.hostname === 'localhost' ||
+        parsed.hostname === '127.0.0.1' ||
+        parsed.hostname === '[::1]';
+      if (!isLocal && parsed.protocol !== 'wss:') {
+        return false;
+      }
+    }
+    return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Computes an HMAC-SHA256 signature for challenge-response room authentication.
+ */
+export async function computeChallengeResponse(keyStr, challengeStr) {
+  if (!keyStr || !challengeStr) return '';
+  try {
+    const cryptoObj = typeof window !== 'undefined' && window.crypto ? window.crypto : globalThis.crypto;
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(keyStr);
+    const msgData = encoder.encode(challengeStr);
+
+    const cryptoKey = await cryptoObj.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signature = await cryptoObj.subtle.sign('HMAC', cryptoKey, msgData);
+    const hashArray = Array.from(new Uint8Array(signature));
+    return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  } catch (err) {
+    console.error('HMAC computation error:', err);
+    return '';
   }
 }
 

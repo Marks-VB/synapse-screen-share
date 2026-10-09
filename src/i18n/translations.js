@@ -52,7 +52,11 @@ export const translations = {
       uplinkReadyDesc: 'Envie o link da sala no topo ou clique em INITIALIZE SYNAPSE LINK abaixo para transmitir sua tela a 60 FPS.',
       uplinkReadyBadge: 'SALA PRONTA // AGUARDANDO PARTICIPANTE',
       copyInviteBtn: 'COPIAR LINK DE CONVITE',
-      copiedSuccess: 'LINK COPIADO COM SUCESSO!'
+      copiedSuccess: 'LINK COPIADO COM SUCESSO!',
+      keyframeBtn: 'Solicitar Keyframe',
+      audioOnlyBtn: 'Modo Somente Áudio',
+      audioOnlyActive: 'MODO SOMENTE ÁUDIO // VÍDEO PAUSADO',
+      viewersCount: 'Espectadores'
     },
     // QuantumDock
     dock: {
@@ -90,6 +94,13 @@ export const translations = {
       signalingLabel: 'SIGNALING UPLINK (WEBSOCKET URL)',
       signalingDesc: "O Cloudflare Pages hospeda o frontend PWA. O servidor WebRTC de sinalização (server.js) roda localmente via 'npm run server' ou pode ser hospedado no Render / Fly.io / Railway.",
       presetLocalhost: 'Localhost (ws://localhost:3000)',
+      turnLabel: 'SERVIDOR TURN / RELAY (OPCIONAL)',
+      turnDesc: 'Necessário para redes corporativas, 4G/5G móvel e NAT simétrico. Ex: coturn ou Cloudflare Calls TURN.',
+      turnUrlPlaceholder: 'turn:turn.exemplo.com:3478 ou coturn',
+      turnUserPlaceholder: 'Usuário / Username',
+      turnCredPlaceholder: 'Senha / Credencial',
+      autoPipLabel: 'PICTURE-IN-PICTURE AUTOMÁTICO',
+      autoPipDesc: 'Ativar PiP automaticamente ao trocar de aba do navegador.',
       nodeLabel: 'NÓ DE REDE // ROOM ID',
       passwordLabel: 'SENHA DA SALA (OPCIONAL)',
       generatePin: 'GERAR PIN',
@@ -182,7 +193,11 @@ export const translations = {
       uplinkReadyDesc: 'Send the room link from the top bar or click INITIALIZE SYNAPSE LINK below to broadcast your screen at 60 FPS.',
       uplinkReadyBadge: 'ROOM READY // AWAITING PARTICIPANT',
       copyInviteBtn: 'COPY INVITATION LINK',
-      copiedSuccess: 'LINK COPIED TO CLIPBOARD!'
+      copiedSuccess: 'LINK COPIED TO CLIPBOARD!',
+      keyframeBtn: 'Request Keyframe',
+      audioOnlyBtn: 'Audio-Only Mode',
+      audioOnlyActive: 'AUDIO-ONLY MODE // VIDEO PAUSED',
+      viewersCount: 'Viewers'
     },
     // QuantumDock
     dock: {
@@ -220,6 +235,13 @@ export const translations = {
       signalingLabel: 'SIGNALING UPLINK (WEBSOCKET URL)',
       signalingDesc: "Cloudflare Pages hosts the PWA frontend. The WebRTC signaling server (server.js) runs locally via 'npm run server' or can be hosted on Render / Fly.io / Railway.",
       presetLocalhost: 'Localhost (ws://localhost:3000)',
+      turnLabel: 'TURN / RELAY SERVER (OPTIONAL)',
+      turnDesc: 'Required for corporate firewalls, mobile 4G/5G and symmetric NAT. Ex: coturn or Cloudflare Calls TURN.',
+      turnUrlPlaceholder: 'turn:turn.example.com:3478 or coturn',
+      turnUserPlaceholder: 'Username',
+      turnCredPlaceholder: 'Password / Credential',
+      autoPipLabel: 'AUTO PICTURE-IN-PICTURE',
+      autoPipDesc: 'Automatically enter PiP when switching browser tabs.',
       nodeLabel: 'NETWORK NODE // ROOM ID',
       passwordLabel: 'ROOM PASSWORD (OPTIONAL)',
       generatePin: 'GENERATE PIN',
@@ -312,7 +334,11 @@ export const translations = {
       uplinkReadyDesc: 'Envía el enlace de la sala arriba o haz clic en INITIALIZE SYNAPSE LINK abajo para transmitir tu pantalla a 60 FPS.',
       uplinkReadyBadge: 'SALA LISTA // ESPERANDO PARTICIPANTE',
       copyInviteBtn: 'COPIAR ENLACE DE INVITACIÓN',
-      copiedSuccess: '¡ENLACE COPIADO AL PORTAPAPELES!'
+      copiedSuccess: '¡ENLACE COPIADO AL PORTAPAPELES!',
+      keyframeBtn: 'Solicitar Keyframe',
+      audioOnlyBtn: 'Modo Solo Audio',
+      audioOnlyActive: 'MODO SOLO AUDIO // VIDEO EN PAUSA',
+      viewersCount: 'Espectadores'
     },
     // QuantumDock
     dock: {
@@ -350,6 +376,13 @@ export const translations = {
       signalingLabel: 'SIGNALING UPLINK (WEBSOCKET URL)',
       signalingDesc: "Cloudflare Pages aloja el frontend PWA. El servidor WebRTC (server.js) se ejecuta localmente con 'npm run server' o puede alojarse en Render / Fly.io / Railway.",
       presetLocalhost: 'Localhost (ws://localhost:3000)',
+      turnLabel: 'SERVIDOR TURN / RELAY (OPCIONAL)',
+      turnDesc: 'Requerido para redes corporativas, 4G/5G y NAT simétrico. Ej: coturn o Cloudflare Calls TURN.',
+      turnUrlPlaceholder: 'turn:turn.ejemplo.com:3478 o coturn',
+      turnUserPlaceholder: 'Usuario / Username',
+      turnCredPlaceholder: 'Contraseña / Credencial',
+      autoPipLabel: 'PICTURE-IN-PICTURE AUTOMÁTICO',
+      autoPipDesc: 'Activar PiP automáticamente al cambiar de pestaña del navegador.',
       nodeLabel: 'NODO DE RED // ROOM ID',
       passwordLabel: 'CONTRASEÑA DE SALA (OPCIONAL)',
       generatePin: 'GENERAR PIN',

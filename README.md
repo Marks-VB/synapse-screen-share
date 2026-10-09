@@ -151,12 +151,59 @@ The resulting `dist/` directory can be deployed directly to **Cloudflare Pages**
 
 ---
 
+## 🌐 NAT Traversal & TURN Server Configuration
+
+While public STUN servers handle >80% of peer connections, restrictive corporate firewalls, mobile 4G/5G carrier-grade NATs (CGNAT), and symmetric NAT routers require a **TURN relay server** to establish a connection.
+
+Synapse supports custom TURN configuration via **Settings (gear icon)** or environment variables (`VITE_ICE_SERVERS`).
+
+### Option 1: Cloudflare Calls TURN (Recommended & Free Tier)
+Cloudflare Calls provides global, anycast TURN relays integrated with Cloudflare Pages:
+1. Log in to the [Cloudflare Dashboard](https://dash.cloudflare.com/) and navigate to **Calls**.
+2. Create an App or generate TURN credentials with ephemeral token auth.
+3. In Synapse, open **Settings** (gear icon) and input:
+   - **TURN URL:** `turns:turn.cloudflare.com:5349?transport=tcp` (or `turn:turn.cloudflare.com:3478?transport=udp`)
+   - **Username:** `<your-cloudflare-calls-key-id>`
+   - **Credential:** `<your-generated-token>`
+4. Or configure it in `.env` for production builds:
+   ```env
+   VITE_ICE_SERVERS='[{"urls":["stun:stun.cloudflare.com:3478","turns:turn.cloudflare.com:5349?transport=tcp"],"username":"YOUR_KEY","credential":"YOUR_TOKEN"}]'
+   ```
+
+### Option 2: Self-Hosted Coturn (Docker)
+Run your own low-latency Coturn relay on a VPS:
+```bash
+docker run -d --name coturn --net=host \
+  coturn/coturn \
+  -n --log-file=stdout \
+  --min-port=49152 --max-port=65535 \
+  --listening-port=3478 --tls-listening-port=5349 \
+  --realm=synapse.yourdomain.com \
+  --user=synapse_user:secure_password \
+  --lt-cred-mech
+```
+Enter `turn:synapse.yourdomain.com:3478` with `synapse_user` and `secure_password` in Synapse Settings.
+
+---
+
+## 🔄 Connection Resilience & Perfect Negotiation
+
+Synapse implements the full W3C **Perfect Negotiation** pattern and automatic **ICE Restart**:
+- **Deterministic Polite/Impolite Role Assignment:** Peers negotiate glare collisions deterministically based on cryptographic ID comparison (`isPolite = operatorId < remotePeerId`). Local offers roll back gracefully without breaking the signaling state.
+- **Automatic ICE Restart:** When network changes occur (switching between Wi-Fi and 5G/4G, roaming, or connection dropouts), the client triggers `pc.restartIce()` and renegotiates automatically within 3.5 seconds without dropping the user session.
+- **Graceful Video Track Cleanup:** Stopping screen transmission cleanly removes video senders via `pc.removeTrack` without destroying the PeerConnection or freezing frames on the viewer end.
+- **HMAC Challenge-Response Room Protection:** Passwords are never sent directly in the clear over WebSocket signaling. Protected rooms issue cryptographic random challenge nonces, signed using HMAC-SHA256 by the client.
+- **Anti-DoS IP Rate Limiting & Concurrency Controls:** Signaling servers enforce concurrent connection limits per IP (max 10) and aggregate message quotas (max 120 msg / 5s per IP).
+
+---
+
 ## 🛡️ Security & Privacy Notice
 
 - **No Relay of Media:** Synapse does not record, buffer, or relay video/audio streams on any server. All transmission occurs directly peer-to-peer over DTLS/SRTP encryption.
+- **Hardened Content Security Policy (CSP):** The production server forbids `'unsafe-inline'` script evaluation and restricts WebSockets, STUN, and TURN endpoints.
 - **Recursive Screen Loop Prevention:** Capture pipelines enforce `selfBrowserSurface: 'exclude'` where supported, preventing infinite recursive mirroring of the Synapse tab.
-- **Rate-Limited Signaling:** Signaling connections enforce strict message quotas (max 60 msg / 5s) and reject payloads exceeding 64 KB to mitigate DoS risks.
-- **Strict Validation:** Room identifiers and SDP payloads undergo rigorous alphanumeric schema validation before being processed.
+- **HMAC Challenge-Response:** Room passwords cannot be intercepted or replayed by listening to signaling traffic.
+- **Strict Validation:** Room identifiers, candidate strings, and SDP payloads undergo rigorous schema validation before relay.
 
 ---
 

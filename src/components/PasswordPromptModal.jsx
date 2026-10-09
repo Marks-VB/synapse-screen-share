@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Lock, Unlock, KeyRound, Eye, EyeOff, ShieldAlert, Check, X, Sparkles, RefreshCw } from 'lucide-react';
+import { Lock, KeyRound, Eye, EyeOff, ShieldAlert, Check, X, Sparkles } from 'lucide-react';
 import { generateSecurePin } from '../utils/security';
 import { useI18n } from '../i18n/I18nContext';
 

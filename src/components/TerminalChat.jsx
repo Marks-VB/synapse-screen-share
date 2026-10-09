@@ -93,6 +93,11 @@ export function TerminalChat({
                       [{msg.sender}]:
                     </span>{' '}
                     <span className="text-slate-100">{msg.text}</span>
+                    {msg.status === 'undelivered' && (
+                      <span className="ml-1.5 text-[10px] text-cyber-red font-bold uppercase tracking-wider bg-red-950/60 px-1 py-0.5 rounded border border-cyber-red/40">
+                        [FALHA // NÃO ENTREGUE]
+                      </span>
+                    )}
                   </>
                 )}
               </div>

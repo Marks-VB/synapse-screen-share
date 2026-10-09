@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useMediaStream } from './hooks/useMediaStream';
 import { useWebRTC } from './hooks/useWebRTC';
 import { Header } from './components/Header';
@@ -78,7 +78,31 @@ export function App() {
   });
   const [isBooting, setIsBooting] = useState(true);
 
+  // TURN / ICE Relay configuration & Auto-PiP preferences
+  const [iceServerUrl, setIceServerUrl] = useState(() => localStorage.getItem('synapse_ice_server_url') || '');
+  const [iceServerUsername, setIceServerUsername] = useState(() => localStorage.getItem('synapse_ice_server_user') || '');
+  const [iceServerCredential, setIceServerCredential] = useState(() => localStorage.getItem('synapse_ice_server_cred') || '');
+  const [autoPip, setAutoPip] = useState(() => localStorage.getItem('synapse_auto_pip') !== 'false');
+
   const logDiagRef = useRef(null);
+
+  // Build ICE servers list including custom TURN relay if provided
+  const iceServers = useMemo(() => {
+    const servers = [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun.cloudflare.com:3478' }
+    ];
+
+    if (iceServerUrl.trim()) {
+      const turnConfig = { urls: iceServerUrl.trim() };
+      if (iceServerUsername.trim()) turnConfig.username = iceServerUsername.trim();
+      if (iceServerCredential.trim()) turnConfig.credential = iceServerCredential.trim();
+      servers.unshift(turnConfig);
+    }
+
+    return servers;
+  }, [iceServerUrl, iceServerUsername, iceServerCredential]);
 
   // Compute password hash for room authentication
   useEffect(() => {
@@ -107,7 +131,7 @@ export function App() {
   // Media Stream Hook
   const {
     screenStream,
-    micStream,
+    micStream: _micStream,
     isScreenSharing,
     isMicMuted,
     isDeafened,
@@ -121,23 +145,15 @@ export function App() {
     stopAllMedia
   } = useMediaStream({
     onScreenEnded: () => {
-      // When screen sharing stops from OS browser prompt
-      if (pcRef.current) {
-        const senders = pcRef.current.getSenders();
-        senders.forEach((s) => {
-          if (s.track && s.track.kind === 'video') {
-            pcRef.current.removeTrack(s);
-          }
-        });
-        sendOffer();
-      }
+      // Graceful track cleanup without killing the entire peer connection
+      removeLocalVideoTracks();
     },
     onLog: (msg, level) => {
       if (logDiagRef.current) logDiagRef.current(msg, level);
     }
   });
 
-  // WebRTC Hook
+  // WebRTC Hook with Perfect Negotiation and ICE Restart
   const {
     pcRef,
     connectionState,
@@ -145,12 +161,16 @@ export function App() {
     iceState,
     remoteStream,
     remotePeerId,
+    roomPeers,
     chatMessages,
     diagLogs,
     metrics,
     sendMessage,
+    requestKeyframe,
+    requestViewerQuality,
     attachLocalStream,
-    sendOffer,
+    removeLocalVideoTracks,
+    sendOffer: _sendOffer,
     closeConnection,
     clearLogs,
     logDiag
@@ -161,6 +181,7 @@ export function App() {
     passwordHash,
     isScreenSharing,
     activeQuality,
+    iceServers,
     onRemoteStreamReceived: () => {
       // Remote stream arrived
     },
@@ -168,31 +189,24 @@ export function App() {
       setPasswordError(message || 'Esta sala requer uma senha de acesso.');
       setPasswordModalMode('prompt');
       setIsPasswordModalOpen(true);
+    },
+    onQualityChangeRequested: (preset) => {
+      setQualityPreset(preset, pcRef.current);
     }
   });
 
   logDiagRef.current = logDiag;
 
-  // Start / Stop Screen Share action
+  // Start / Stop Screen Share action with clean sender removal
   const handleToggleScreenShare = async () => {
     if (isScreenSharing) {
       stopScreenShare();
-      // Remove video track senders from peer connection
-      if (pcRef.current) {
-        const senders = pcRef.current.getSenders();
-        senders.forEach((s) => {
-          if (s.track && s.track.kind === 'video') {
-            pcRef.current.removeTrack(s);
-          }
-        });
-        await sendOffer();
-      }
+      removeLocalVideoTracks();
     } else {
       try {
         const stream = await startScreenShare();
         attachLocalStream(stream);
         await applySenderBitrate(pcRef.current, activeQuality);
-        await sendOffer();
       } catch (err) {
         console.error('Screen share initialization error:', err);
       }
@@ -223,8 +237,17 @@ export function App() {
     }
   };
 
-  // Settings Save
-  const handleSaveSettings = ({ signalingUrl: newUrl, roomId: newRoom, operatorId: newOp, roomPassword: newPwd }) => {
+  // Settings Save Handler
+  const handleSaveSettings = ({
+    signalingUrl: newUrl,
+    roomId: newRoom,
+    operatorId: newOp,
+    roomPassword: newPwd,
+    iceServerUrl: newTurnUrl,
+    iceServerUsername: newTurnUser,
+    iceServerCredential: newTurnCred,
+    autoPip: newAutoPip
+  }) => {
     const cleanUrl = isValidSignalingUrl(newUrl) ? newUrl.trim() : signalingUrl;
     const cleanRoom = sanitizeIdentifier(newRoom, roomId);
     const cleanOp = sanitizeIdentifier(newOp, operatorId);
@@ -234,8 +257,18 @@ export function App() {
     setOperatorId(cleanOp);
     setRoomPassword(typeof newPwd === 'string' ? newPwd.trim() : roomPassword);
 
+    setIceServerUrl(newTurnUrl || '');
+    setIceServerUsername(newTurnUser || '');
+    setIceServerCredential(newTurnCred || '');
+    setAutoPip(!!newAutoPip);
+
     localStorage.setItem('synapse_signaling_url', cleanUrl);
     localStorage.setItem('synapse_operator_id', cleanOp);
+    localStorage.setItem('synapse_ice_server_url', newTurnUrl || '');
+    localStorage.setItem('synapse_ice_server_user', newTurnUser || '');
+    localStorage.setItem('synapse_ice_server_cred', newTurnCred || '');
+    localStorage.setItem('synapse_auto_pip', newAutoPip ? 'true' : 'false');
+
     handleTerminate();
   };
 
@@ -282,6 +315,10 @@ export function App() {
             connectionState={connectionState}
             signalingState={signalingState}
             remotePeerId={remotePeerId}
+            roomPeers={roomPeers}
+            autoPip={autoPip}
+            onRequestKeyframe={requestKeyframe}
+            onRequestViewerQuality={requestViewerQuality}
             onToggleScreenShare={handleToggleScreenShare}
           />
 
@@ -322,6 +359,10 @@ export function App() {
         roomId={roomId}
         operatorId={operatorId}
         roomPassword={roomPassword}
+        iceServerUrl={iceServerUrl}
+        iceServerUsername={iceServerUsername}
+        iceServerCredential={iceServerCredential}
+        autoPip={autoPip}
         onSave={handleSaveSettings}
       />
 

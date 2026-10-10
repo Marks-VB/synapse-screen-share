@@ -125,6 +125,8 @@ O aplicativo estará rodando em `http://seu-ip:3000` (e o WebSocket em `ws://seu
 | `NODE_ENV` | `development` | `production` otimiza logs e ativa compressão de assets |
 | `MAX_PEERS_PER_ROOM` | `8` | Limite máximo de participantes simultâneos por sala |
 | `RATE_LIMIT_MAX_MESSAGES` | `60` | Teto de mensagens de sinalização a cada 5 segundos por IP |
+| `VITE_SIGNALING_URL` | Auto (Host local) | URL do servidor WebSocket (ex: `wss://signaling.seudominio.com`) |
+| `VITE_ICE_SERVERS` | Google / CF STUN | JSON array com servidores STUN/TURN (ex: `[{"urls":"turn:..."}]`) |
 
 ---
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShieldCheck, User, Cookie, Tv, Sparkles, ArrowRight, Check, X, Dices } from 'lucide-react';
 import { generateSecureId, sanitizeIdentifier } from '../utils/security';
 import { useI18n } from '../i18n/I18nContext';

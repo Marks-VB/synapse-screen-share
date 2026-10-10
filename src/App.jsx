@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useMediaStream } from './hooks/useMediaStream';
 import { useWebRTC } from './hooks/useWebRTC';
 import { Header } from './components/Header';
@@ -41,6 +41,9 @@ function getInitialPassword() {
 function getInitialSignalingUrl() {
   const saved = localStorage.getItem('synapse_signaling_url');
   if (saved && isValidSignalingUrl(saved)) return saved;
+
+  const envUrl = typeof import.meta !== 'undefined' && import.meta.env?.VITE_SIGNALING_URL;
+  if (envUrl && isValidSignalingUrl(envUrl)) return envUrl.trim();
 
   const isHttps = window.location.protocol === 'https:';
   const port = window.location.port === '5173' ? '3000' : window.location.port;
@@ -88,11 +91,20 @@ export function App() {
 
   // Build ICE servers list including custom TURN relay if provided
   const iceServers = useMemo(() => {
-    const servers = [
+    let servers = [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
       { urls: 'stun:stun.cloudflare.com:3478' }
     ];
+
+    try {
+      if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ICE_SERVERS) {
+        const parsed = JSON.parse(import.meta.env.VITE_ICE_SERVERS);
+        if (Array.isArray(parsed) && parsed.length > 0) servers = parsed;
+      }
+    } catch {
+      // fallback to default servers
+    }
 
     if (iceServerUrl.trim()) {
       const turnConfig = { urls: iceServerUrl.trim() };

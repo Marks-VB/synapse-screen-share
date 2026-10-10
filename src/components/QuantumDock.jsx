@@ -1,4 +1,3 @@
-import React from 'react';
 import { Mic, MicOff, Volume2, VolumeX, ScreenShare, Power } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext';
 

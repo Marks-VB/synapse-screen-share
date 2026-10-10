@@ -136,7 +136,7 @@ function createCyberpunkPNG(size) {
 
       // Hexagon ring test
       const hexR = size * 0.32;
-      const angle = Math.atan2(y - center, x - center);
+      const _angle = Math.atan2(y - center, x - center);
       const hexDist = Math.hypot(x - center, y - center);
       const isHexEdge = Math.abs(hexDist - hexR) < size * 0.02;
 

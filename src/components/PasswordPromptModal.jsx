@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Lock, KeyRound, Eye, EyeOff, ShieldAlert, Check, X, Sparkles } from 'lucide-react';
 import { generateSecurePin } from '../utils/security';
 import { useI18n } from '../i18n/I18nContext';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Zap } from 'lucide-react';
 
 const BOOT_LOGS = [

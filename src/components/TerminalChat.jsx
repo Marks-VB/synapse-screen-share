@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Trash2 } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Network, Server, Hash, ShieldCheck, Check, Lock, Eye, EyeOff, Sparkles, Languages, Radio, Tv } from 'lucide-react';
 import { generateSecurePin } from '../utils/security';
 import { useI18n } from '../i18n/I18nContext';

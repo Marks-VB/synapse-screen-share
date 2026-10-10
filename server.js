@@ -534,8 +534,8 @@ export function createSignalingServer(options = {}) {
 
 // Direct execution entry point
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { server } = createSignalingServer();
-  server.listen(PORT, () => {
+  const { server, wss } = createSignalingServer();
+  const httpServer = server.listen(PORT, () => {
     console.log(`
 \x1b[36m═══════════════════════════════════════════════════════════\x1b[0m
   \x1b[1m\x1b[35mSYNAPSE SCREEN SHARE\x1b[0m - Real-Time WebRTC Media Core
@@ -545,4 +545,30 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 \x1b[36m═══════════════════════════════════════════════════════════\x1b[0m
     `);
   });
+
+  const shutdown = (signal) => {
+    console.log(`\n\x1b[33m[SHUTDOWN]\x1b[0m Received ${signal}. Closing connections gracefully...`);
+    wss.clients.forEach((client) => {
+      try {
+        client.close(1001, 'Server shutting down');
+      } catch {
+        // safe ignore
+      }
+    });
+    wss.close(() => {
+      httpServer.close(() => {
+        console.log('\x1b[32m[SHUTDOWN]\x1b[0m All connections closed. Process terminating cleanly.');
+        process.exit(0);
+      });
+    });
+
+    // Force exit after 5 seconds if connections hang
+    setTimeout(() => {
+      console.error('\x1b[31m[SHUTDOWN]\x1b[0m Forcing shutdown after timeout.');
+      process.exit(1);
+    }, 5000).unref();
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
